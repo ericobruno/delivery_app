@@ -1,0 +1,6 @@
+<%# Este partial é renderizado dentro do turbo-frame aceitar-pedido-<order.id> %>
+<% if order.status == 'ag_aprovacao' %>
+  <%= button_to 'Aceitar pedido', accept_admin_order_path(order), method: :post, class: 'btn btn-success me-2', data: { turbo: true, turbo_frame: "aceitar-pedido-#{order.id}", confirm: 'Aceitar este pedido?' } %>
+<% else %>
+  <span class="text-success fw-bold">Pedido aceito!</span>
+<% end %> 

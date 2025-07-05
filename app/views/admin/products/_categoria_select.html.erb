@@ -1,0 +1,1 @@
+<%= form.collection_select :category_id, Category.all, :id, :name, { prompt: 'Selecione a categoria', selected: (defined?(selected) ? selected : nil) }, class: 'form-select', required: false %> 

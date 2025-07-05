@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: API de Pedidos - DeliveryApp
+  version: 1.0.0
+  description: |
+    Endpoint para criação de pedidos com autenticação por token.
+    
+    - O token deve ser enviado no header Authorization.
+    - Datas devem estar no formato ISO8601.
+    - IDs de cliente e produto devem existir no banco.
+    - Use HTTPS em produção.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/orders:
+    post:
+      summary: Criação de pedido
+      description: Cria um novo pedido autenticado por token.
+      tags:
+        - Pedidos
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: object
+                  required:
+                    - customer_id
+                    - status
+                    - order_items_attributes
+                  properties:
+                    customer_id:
+                      type: integer
+                      example: 1
+                    status:
+                      type: string
+                      example: agendado
+                    scheduled_for:
+                      type: string
+                      format: date-time
+                      example: '2024-08-10T15:00:00'
+                    scheduled_notes:
+                      type: string
+                      example: Entregar na portaria
+                    order_items_attributes:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - product_id
+                          - quantity
+                          - price
+                        properties:
+                          product_id:
+                            type: integer
+                            example: 2
+                          quantity:
+                            type: integer
+                            example: 1
+                          price:
+                            type: number
+                            format: float
+                            example: 50.0
+      responses:
+        '201':
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: sucesso
+                  mensagem:
+                    type: string
+                    example: Pedido criado com sucesso.
+                  pedido_id:
+                    type: integer
+                    example: 123
+                  dados:
+                    type: object
+                    properties:
+                      cliente_id:
+                        type: integer
+                        example: 1
+                      status:
+                        type: string
+                        example: agendado
+                      agendado_para:
+                        type: string
+                        format: date-time
+                        example: '2024-08-10T15:00:00'
+        '401':
+          description: Erro de autenticação
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  erro:
+                    type: string
+                    example: não autorizado
+                  mensagem:
+                    type: string
+                    example: Token de autenticação inválido ou ausente.
+        '422':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: erro
+                  mensagem:
+                    type: string
+                    example: Não foi possível criar o pedido.
+                  erros:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Cliente deve existir", "Itens do pedido não podem estar vazios"]
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 

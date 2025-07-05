@@ -1,0 +1,77 @@
+<% if order.errors.any? %>
+  <div class="alert alert-danger">
+    <h4>Erros ao salvar o pedido:</h4>
+    <ul>
+      <% order.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+<%= form_with(model: [:admin, order], local: true, class: 'row g-3') do |form| %>
+  <div class="col-md-6">
+    <%= form.label :customer_id, 'Cliente', class: 'form-label' %>
+    <%= form.collection_select :customer_id, Customer.all, :id, :name, { prompt: 'Selecione o cliente' }, class: 'form-select', required: true %>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :status, 'Status', class: 'form-label' %>
+    <%= form.select :status, options_for_select(['novo', 'ag_aprovacao', 'em_preparacao', 'pronto', 'entregue', 'cancelado'], order.status), {}, class: 'form-select', required: true %>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :scheduled_for, 'Data e hora para entrega', class: 'form-label' %>
+    <%= form.datetime_field :scheduled_for, class: 'form-control', required: false %>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :scheduled_notes, 'Informações da entrega', class: 'form-label' %>
+    <%= form.text_field :scheduled_notes, class: 'form-control', required: false %>
+  </div>
+  <div class="col-12">
+    <%= form.label :description, 'Descrição do pedido', class: 'form-label' %>
+    <%= form.text_area :description, class: 'form-control', rows: 2 %>
+  </div>
+  <div class="col-12">
+    <h5>Itens do Pedido</h5>
+    <div id="order-items">
+      <%= form.fields_for :order_items do |item_form| %>
+        <div class="row mb-2 align-items-end order-item-fields">
+          <div class="col-md-4">
+            <%= item_form.label :product_id, 'Produto', class: 'form-label' %>
+            <%= item_form.collection_select :product_id, Product.where.not(category: Category.find_by(name: 'Adicionais')), :id, :name, { prompt: 'Selecione o produto' }, class: 'form-select', required: true %>
+          </div>
+          <div class="col-md-3">
+            <%= item_form.label :quantity, 'Quantidade', class: 'form-label' %>
+            <%= item_form.number_field :quantity, class: 'form-control', min: 1, required: true %>
+          </div>
+          <div class="col-md-3">
+            <%= item_form.label :price, 'Preço', class: 'form-label' %>
+            <%= item_form.number_field :price, step: 0.01, class: 'form-control', required: true %>
+          </div>
+          <div class="col-md-2">
+            <div class="d-flex align-items-end gap-1">
+              <turbo-frame id="additionals-select">
+                <div class="flex-grow-1">
+                  <%= item_form.label :additional_product_ids, 'Adicionais', class: 'form-label' %>
+                  <%= item_form.collection_select :additional_product_ids, Product.where(category: Category.find_by(name: 'Adicionais')), :id, :name, { prompt: 'Selecione adicionais', multiple: true }, class: 'form-select', required: false %>
+                </div>
+                <div>
+                  <%= button_to '+', '/admin/products/new?category_id=' + Category.find_by(name: 'Adicionais').try(:id).to_s, method: :get, form: { data: { turbo_frame: 'modal' } }, class: 'btn btn-outline-success btn-sm', title: 'Novo adicional', formmethod: 'get', type: 'button' %>
+                </div>
+              </turbo-frame>
+            </div>
+          </div>
+          <div class="col-md-1">
+            <% if item_form.object.persisted? %>
+              <%= item_form.check_box :_destroy %> Remover
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <!-- Para adicionar/remover itens dinamicamente, pode-se usar Stimulus no futuro -->
+  </div>
+  <div class="col-12">
+    <%= form.submit (order.new_record? ? 'Criar Pedido' : 'Salvar Pedido'), class: 'btn btn-primary' %>
+  </div>
+<% end %>
+
+<turbo-frame id="modal"></turbo-frame> 

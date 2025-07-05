@@ -1,0 +1,10 @@
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title"><%= @category.name %></h2>
+    <div class="mt-3">
+      <%= link_to 'Editar', edit_admin_category_path(@category), class: 'btn btn-outline-primary' %>
+      <%= link_to 'Excluir', admin_category_path(@category), method: :delete, data: { confirm: 'Tem certeza?' }, class: 'btn btn-outline-danger' %>
+      <%= link_to 'Voltar', admin_categories_path, class: 'btn btn-secondary' %>
+    </div>
+  </div>
+</div>

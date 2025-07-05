@@ -1,0 +1,9 @@
+<%= fields_for :order_items do |item_form| %>
+  <div class="flex-grow-1">
+    <%= item_form.label :additional_ids, 'Adicionais', class: 'form-label' %>
+    <%= item_form.collection_select :additional_ids, Additional.all, :id, :name, { prompt: 'Selecione adicionais', multiple: true }, class: 'form-select', required: false %>
+  </div>
+  <div>
+    <%= button_to '+', new_admin_additional_path, method: :get, form: { data: { turbo_frame: 'modal' } }, class: 'btn btn-outline-success btn-sm', title: 'Novo adicional', type: 'button' %>
+  </div>
+<% end %> 

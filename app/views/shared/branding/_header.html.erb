@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <img src="<%= asset_path('logos/logo.png') %>" alt="Logo" height="32" class="me-2">
+    <span class="navbar-brand"><%= Rails.application.config_for(:settings)["loja"]["nome"] rescue 'DeliveryApp' %></span>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAdmin" aria-controls="navbarAdmin" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarAdmin">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <%= link_to 'Dashboard', admin_root_path, class: 'nav-link' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to 'Produtos', admin_products_path, class: 'nav-link' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to 'Pedidos', admin_orders_path, class: 'nav-link' %>
+        </li>
+        <li class="nav-item">
+          <%= link_to 'Clientes', admin_customers_path, class: 'nav-link' %>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav> 

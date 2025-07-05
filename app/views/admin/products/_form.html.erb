@@ -1,0 +1,39 @@
+<%= form_with(model: [:admin, product], local: true, class: 'row g-3', html: { multipart: true }) do |form| %>
+  <div class="col-md-6">
+    <%= form.label :category_id, 'Categoria', class: 'form-label' %>
+    <turbo-frame id="categoria-select">
+      <div class="input-group">
+        <%= render 'admin/products/categoria_select', form: form, selected: form.object.category_id %>
+        <span class="input-group-text p-0">
+          <%= link_to '+', '/admin/categories/new', data: { turbo_frame: 'modal-categoria' }, class: 'btn btn-outline-success btn-sm', title: 'Nova categoria' %>
+        </span>
+      </div>
+    </turbo-frame>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :name, 'Nome', class: 'form-label' %>
+    <%= form.text_field :name, class: 'form-control', required: true %>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :price, 'Preço', class: 'form-label' %>
+    <%= form.number_field :price, step: 0.01, class: 'form-control', required: true %>
+  </div>
+  <div class="col-md-6">
+    <%= form.label :image, 'Imagem', class: 'form-label' %>
+    <%= form.file_field :image, class: 'form-control' %>
+    <% if product.image.attached? %>
+      <div class="mt-2">
+        <%= image_tag product.image.variant(resize_to_limit: [120, 120]), class: 'img-thumbnail' %>
+      </div>
+    <% end %>
+  </div>
+  <div class="col-12">
+    <%= form.label :description, 'Descrição', class: 'form-label' %>
+    <%= form.text_area :description, class: 'form-control', rows: 3 %>
+  </div>
+  <div class="col-12">
+    <%= form.submit class: 'btn btn-primary' %>
+  </div>
+<% end %>
+
+<turbo-frame id="modal-categoria"></turbo-frame> 

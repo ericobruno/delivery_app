@@ -1,0 +1,7 @@
+<turbo-frame id="approve-order-<%= order.id %>">
+  <% if order.status == 'ag_aprovacao' %>
+    <%= button_to 'Aprovar', accept_admin_order_path(order), method: :post, class: 'btn btn-success btn-sm', data: { turbo_confirm: 'Aprovar este pedido? Isso o colocará como NOVO para produção.' } %>
+  <% else %>
+    <span class="text-success fw-bold">✓ Aprovado</span>
+  <% end %>
+</turbo-frame> 

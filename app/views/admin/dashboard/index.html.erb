@@ -1,0 +1,22 @@
+<h1>Painel Administrativo</h1>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+  <div></div>
+  <div>
+    <turbo-frame id="aceite-automatico-btn">
+      <%= render 'aceite_automatico_button' %>
+    </turbo-frame>
+    <%= form_with url: admin_root_path, method: :get, data: { turbo_frame: 'pedidos' }, class: 'd-flex align-items-center gap-2 d-inline' do |f| %>
+      <label class="form-label mb-0 me-1">De:</label>
+      <%= f.date_field :from, value: @from, class: 'form-control form-control-sm' %>
+      <label class="form-label mb-0 ms-2 me-1">Até:</label>
+      <%= f.date_field :to, value: @to, class: 'form-control form-control-sm' %>
+      <%= f.submit 'Filtrar', class: 'btn btn-sm btn-primary ms-2' %>
+    <% end %>
+  </div>
+</div>
+
+<h3>Pedidos Filtrados</h3>
+<turbo-frame id="pedidos">
+  <%= render 'status_cards' %>
+  <%= render 'pedidos_table', orders: @filtered_orders %>
+</turbo-frame>

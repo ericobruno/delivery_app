@@ -1,0 +1,3 @@
+<%= turbo_stream.replace "approve-order-#{@order.id}" do %>
+  <%= render 'approve_button', order: @order %>
+<% end %> 

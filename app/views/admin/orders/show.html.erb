@@ -1,0 +1,55 @@
+<div class="card mb-3">
+  <div class="card-body">
+    <h2 class="card-title">Pedido #<%= @order.id %></h2>
+    <h6 class="card-subtitle mb-2 text-muted">Cliente: <%= @order.customer&.name %></h6>
+    <p class="card-text">Status: <span class="badge bg-info"><%= @order.status %></span></p>
+    <% if @order.description.present? %>
+      <p class="card-text"><strong>Descrição do pedido:</strong> <%= @order.description %></p>
+    <% end %>
+    <h5 class="mt-4">Itens do Pedido</h5>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Adicionais</th>
+          <th>Quantidade</th>
+          <th>Preço</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @order.order_items.each do |item| %>
+          <tr>
+            <td><%= item.product&.name %></td>
+            <td>
+              <% if item.additional_products.any? %>
+                <ul class="mb-0 ps-3">
+                  <% item.additional_products.each do |ad| %>
+                    <li>
+                      <%= ad.name %>
+                      <% if ad.price.present? && ad.price > 0 %>
+                        (R$ <%= number_to_currency(ad.price, unit: '', separator: ',', delimiter: '.') %>)
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <span class="text-muted">Nenhum</span>
+              <% end %>
+            </td>
+            <td><%= item.quantity %></td>
+            <td>R$ <%= number_to_currency(item.price, unit: '', separator: ',', delimiter: '.') %></td>
+            <td>R$ <%= number_to_currency(item.price.to_f * item.quantity, unit: '', separator: ',', delimiter: '.') %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <div class="fw-bold">Total: R$ <%= number_to_currency(@order.order_items.sum { |item| item.price.to_f * item.quantity }, unit: '', separator: ',', delimiter: '.') %></div>
+    <div class="mt-3">
+      <%= render 'approve_button', order: @order %>
+      <%= link_to 'Editar', edit_admin_order_path(@order), class: 'btn btn-outline-primary' %>
+      <%= link_to 'Excluir', admin_order_path(@order), method: :delete, data: { confirm: 'Tem certeza?' }, class: 'btn btn-outline-danger' %>
+      <%= link_to 'Voltar', admin_orders_path, class: 'btn btn-secondary' %>
+    </div>
+  </div>
+</div>

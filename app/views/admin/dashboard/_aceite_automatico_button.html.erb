@@ -1,0 +1,19 @@
+<!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
+
+<div data-controller="aceite">
+  <% if Setting.aceite_automatico? %>
+    <button data-aceite-target="button" 
+            data-action="click->aceite#toggle"
+            class="btn btn-success btn-sm" 
+            data-status="on">
+      Aceite automático ON
+    </button>
+  <% else %>
+    <button data-aceite-target="button" 
+            data-action="click->aceite#toggle"
+            class="btn btn-outline-secondary btn-sm" 
+            data-status="off">
+      Aceite automático OFF
+    </button>
+  <% end %>
+</div> 

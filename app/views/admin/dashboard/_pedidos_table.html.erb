@@ -1,0 +1,27 @@
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Status</th>
+      <th>Criado em</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% orders.each do |order| %>
+      <tr>
+        <td>#<%= order.id %></td>
+        <td><%= order.customer&.name %></td>
+        <td><span class="badge bg-secondary text-capitalize"><%= order.status.tr('_', ' ') %></span></td>
+        <td><%= l(order.created_at, format: :short) %></td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <%= render 'admin/orders/approve_button', order: order %>
+            <%= link_to 'Ver', admin_order_path(order), class: 'btn btn-sm btn-outline-secondary', data: { turbo: false } %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table> 

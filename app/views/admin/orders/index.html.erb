@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Pedidos</h1>
+  <%= link_to 'Novo Pedido', new_admin_order_path, class: 'btn btn-primary' %>
+</div>
+
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Status</th>
+      <th>Total</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td>#<%= order.id %></td>
+        <td><%= order.customer&.name %></td>
+        <td><%= order.status %></td>
+        <td>R$ <%= number_to_currency(order.order_items.sum { |item| item.price.to_f * item.quantity }, unit: '', separator: ',', delimiter: '.') %></td>
+        <td>
+          <%= link_to 'Ver', admin_order_path(order), class: 'btn btn-sm btn-outline-secondary' %>
+          <%= link_to 'Editar', edit_admin_order_path(order), class: 'btn btn-sm btn-outline-primary' %>
+          <%= link_to 'Excluir', admin_order_path(order), method: :delete, data: { confirm: 'Tem certeza?' }, class: 'btn btn-sm btn-outline-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

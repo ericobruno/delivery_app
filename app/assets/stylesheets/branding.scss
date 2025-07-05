@@ -1,0 +1,8 @@
+:root {
+  --primary: #c8102e; // pode ser dinâmico no futuro com Settings
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+} 

@@ -1,0 +1,27 @@
+<div class="row mb-4">
+  <% @statuses.each do |status| %>
+    <% color = case status.downcase
+      when 'novo' then 'primary'
+      when 'em preparacao', 'em preparação' then 'warning'
+      when 'pronto' then 'info'
+      when 'entregue' then 'success'
+      when 'cancelado' then 'danger'
+      else 'secondary'
+    end %>
+    <% selected = params[:status].to_s == status.to_s %>
+    <div class="col-6 col-md-3 mb-3">
+      <%= link_to admin_root_path(from: @from, to: @to, status: status),
+        data: { turbo_frame: 'pedidos' },
+        class: [
+          "card text-bg-#{color} h-100 w-100 border-0 p-0 text-decoration-none shadow-sm",
+          (selected ? 'border border-3 border-dark shadow-lg scale-105' : 'opacity-90 hover-opacity-100'),
+        ].join(' '),
+        style: 'cursor:pointer; min-height: 120px; transition: box-shadow 0.2s, transform 0.2s;' do %>
+        <div class="card-body text-center d-flex flex-column justify-content-center align-items-center" style="height: 100px;">
+          <h5 class="card-title text-capitalize mb-2" style="font-size: 1.1rem;"><%= status.tr('_', ' ') %></h5>
+          <p class="display-5 mb-0" style="font-size: 2rem;"><%= @orders_by_status[status] %></p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div> 
