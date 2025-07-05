@@ -1,19 +1,93 @@
 <!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
 
-<div data-controller="aceite">
-  <% if Setting.aceite_automatico? %>
-    <button data-aceite-target="button" 
-            data-action="click->aceite#toggle"
-            class="btn btn-success btn-sm" 
-            data-status="on">
-      Aceite automático ON
-    </button>
-  <% else %>
-    <button data-aceite-target="button" 
-            data-action="click->aceite#toggle"
-            class="btn btn-outline-secondary btn-sm" 
-            data-status="off">
-      Aceite automático OFF
-    </button>
-  <% end %>
-</div> 
+<% if Setting.aceite_automatico? %>
+  <button id="aceite-btn" class="btn btn-success btn-sm" data-status="on" onclick="toggleAceite()">
+    Aceite automático ON
+  </button>
+<% else %>
+  <button id="aceite-btn" class="btn btn-outline-secondary btn-sm" data-status="off" onclick="toggleAceite()">
+    Aceite automático OFF
+  </button>
+<% end %>
+
+<script>
+function toggleAceite() {
+  const button = document.getElementById('aceite-btn');
+  const currentStatus = button.getAttribute('data-status');
+  const newStatus = currentStatus === 'on' ? 'off' : 'on';
+  
+  console.log('Clique detectado! Status atual:', currentStatus);
+  
+  // Confirmar ação
+  const confirmMessage = currentStatus === 'on' 
+    ? 'Tem certeza que deseja DESATIVAR o aceite automático?'
+    : 'Tem certeza que deseja ATIVAR o aceite automático?';
+  
+  if (!confirm(confirmMessage)) {
+    console.log('Usuário cancelou a ação');
+    return;
+  }
+  
+  console.log('Usuário confirmou, enviando requisição...');
+  
+  // Desabilitar botão temporariamente
+  button.disabled = true;
+  button.textContent = 'Processando...';
+  
+  fetch('/admin/toggle_aceite_automatico', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
+    body: `status=${newStatus}`
+  })
+  .then(response => {
+    console.log('Resposta recebida:', response);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Dados recebidos:', data);
+    
+    if (data.success) {
+      // Atualizar botão
+      button.setAttribute('data-status', data.status);
+      button.textContent = `Aceite automático ${data.status.toUpperCase()}`;
+      
+      // Atualizar classes
+      if (data.status === 'on') {
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+      } else {
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+      }
+      
+      console.log('Interface atualizada com sucesso!');
+      
+      // Mostrar mensagem de sucesso
+      if (data.message) {
+        alert(data.message);
+      }
+    } else {
+      throw new Error(data.message || 'Erro desconhecido');
+    }
+  })
+  .catch(error => {
+    console.error('Erro na requisição:', error);
+    alert('Erro ao alterar configuração: ' + error.message);
+    
+    // Restaurar botão em caso de erro
+    button.textContent = `Aceite automático ${currentStatus.toUpperCase()}`;
+  })
+  .finally(() => {
+    button.disabled = false;
+  });
+}
+
+console.log('Script de aceite automático carregado!');
+</script> 

@@ -23,13 +23,21 @@ class Admin::DashboardController < ApplicationController
 
   def toggle_aceite_automatico
     current = Setting.aceite_automatico?
-    Setting.set('aceite_automatico', current ? 'off' : 'on')
+    new_status = params[:status] == 'on' ? 'on' : 'off'
+    Setting.set('aceite_automatico', new_status)
     
     respond_to do |format|
+      format.json do
+        render json: { 
+          success: true, 
+          status: new_status,
+          message: "Aceite automático #{new_status == 'on' ? 'ativado' : 'desativado'}!"
+        }
+      end
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace('aceite-automatico-btn', partial: 'admin/dashboard/aceite_automatico_button')
       end
-      format.html { redirect_to admin_root_path, notice: "Aceite automático #{current ? 'desativado' : 'ativado'}!" }
+      format.html { redirect_to admin_root_path, notice: "Aceite automático #{new_status == 'on' ? 'ativado' : 'desativado'}!" }
     end
   end
 end
