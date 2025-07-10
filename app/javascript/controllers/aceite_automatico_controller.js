@@ -1,7 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { status: Boolean }
+  static values = { 
+    status: Boolean,
+    url: String
+  }
 
   initialize() {
     console.log('🎯 Aceite Automático Controller inicializado');
@@ -10,12 +13,8 @@ export default class extends Controller {
   connect() {
     console.log('🎯 Aceite Automático Controller conectado');
     console.log('📊 Status inicial:', this.statusValue);
-    console.log('🔗 Elemento:', this.element);
-    console.log('🔍 Data attributes:', {
-      controller: this.element.dataset.controller,
-      statusValue: this.element.dataset.aceiteAutomaticoStatusValue,
-      action: this.element.dataset.action
-    });
+    console.log('🔗 URL:', this.urlValue);
+    console.log('🔍 Elemento:', this.element);
     
     // Adicionar classe para animações
     this.element.classList.add('aceite-automatico-button');
@@ -28,7 +27,7 @@ export default class extends Controller {
     console.log('🔄 Toggle iniciado');
     console.log('🔍 Evento:', event);
     
-    const button = this.element;
+    const button = this.element.querySelector('[data-aceite-automatico-target="button"]');
     const currentStatus = this.statusValue;
     const newStatus = !currentStatus;
     
@@ -49,7 +48,7 @@ export default class extends Controller {
       const token = this.getCSRFToken();
       console.log('🔑 CSRF Token:', token);
       
-      const response = await fetch('/admin/toggle_aceite_automatico', {
+      const response = await fetch(this.urlValue, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -84,7 +83,7 @@ export default class extends Controller {
   }
 
   animateButton(loading) {
-    const button = this.element;
+    const button = this.element.querySelector('[data-aceite-automatico-target="button"]');
     const buttonText = button.querySelector('.button-text');
     const spinner = button.querySelector('.spinner-border');
     
@@ -108,9 +107,9 @@ export default class extends Controller {
   }
 
   updateButton(status) {
-    const button = this.element;
+    const button = this.element.querySelector('[data-aceite-automatico-target="button"]');
     const buttonText = button.querySelector('.button-text');
-    const card = button.closest('.card');
+    const card = this.element.closest('.card');
     const icon = card.querySelector('i');
     const badge = card.querySelector('.badge');
     

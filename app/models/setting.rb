@@ -30,7 +30,7 @@ class Setting < ApplicationRecord
 
   # Método para verificar se uma configuração existe
   def self.exists?(key)
-    exists?(key: key)
+    where(key: key).exists?
   end
 
   # Método para obter configuração com valor padrão

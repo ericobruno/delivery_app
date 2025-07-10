@@ -19,7 +19,16 @@ class Admin::DashboardController < ApplicationController
   def toggle_aceite_automatico
     current = Setting.aceite_automatico?
     new_status = params[:status] == 'on' ? 'on' : 'off'
+    
+    # Garantir que a setting existe
+    unless Setting.exists?(key: 'aceite_automatico')
+      Setting.create!(key: 'aceite_automatico', value: 'off')
+    end
+    
     Setting.set('aceite_automatico', new_status)
+    
+    # Forçar reload do cache
+    Setting.aceite_automatico_force_reload!
     
     respond_to do |format|
       format.json do
