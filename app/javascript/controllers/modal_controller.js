@@ -1,61 +1,80 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ["modal", "backdrop"]
+  static values = { 
+    title: String,
+    content: String
+  }
+
   connect() {
-    console.log('🔥 Modal controller connected - WORKING!');
-    console.log('Modal element:', this.element);
-    
-    // Add backdrop when modal is shown
+    console.log("Modal controller conectado")
+  }
+
+  show() {
+    this.createModal()
+    this.modalTarget.classList.add('show')
+    this.modalTarget.style.display = 'block'
     document.body.classList.add('modal-open')
-    document.body.style.overflow = 'hidden'
     
-    // Add event listener for ESC key
-    this.escapeListener = this.handleEscape.bind(this)
-    document.addEventListener('keydown', this.escapeListener)
+    if (this.hasBackdropTarget) {
+      this.backdropTarget.classList.add('show')
+    }
   }
 
-  disconnect() {
-    console.log('Modal controller disconnected');
-    
-    // Remove backdrop when modal is disconnected
+  hide() {
+    this.modalTarget.classList.remove('show')
+    this.modalTarget.style.display = 'none'
     document.body.classList.remove('modal-open')
-    document.body.style.overflow = ''
     
-    // Remove ESC key listener
-    if (this.escapeListener) {
-      document.removeEventListener('keydown', this.escapeListener)
+    if (this.hasBackdropTarget) {
+      this.backdropTarget.classList.remove('show')
     }
   }
 
-  close(event) {
-    console.log('🚀 Modal close called - button clicked', event);
-    
-    // Close modal by removing the turbo frame content
-    const modalFrame = document.getElementById('modal')
-    if (modalFrame) {
-      console.log('Modal frame found, clearing content');
-      modalFrame.innerHTML = ''
-    } else {
-      console.log('❌ Modal frame not found');
+  createModal() {
+    if (!this.hasModalTarget) {
+      const modal = document.createElement('div')
+      modal.className = 'modal fade'
+      modal.setAttribute('tabindex', '-1')
+      modal.setAttribute('aria-labelledby', 'modalLabel')
+      modal.setAttribute('aria-hidden', 'true')
+      modal.setAttribute('data-modal-target', 'modal')
+      
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalLabel">${this.titleValue || 'Confirmação'}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ${this.contentValue || 'Tem certeza que deseja continuar?'}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="click->modal#hide">Cancelar</button>
+              <button type="button" class="btn btn-primary" data-action="click->modal#confirm">Confirmar</button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      document.body.appendChild(modal)
+      this.modalTarget = modal
     }
   }
 
-  closeBackground(event) {
-    console.log('Modal closeBackground called', event.target, event.currentTarget);
-    
-    // Close modal when clicking on backdrop (only if clicking the backdrop itself)
-    if (event.target === this.element) {
-      console.log('Clicked on backdrop, closing modal');
-      this.close(event)
-    } else {
-      console.log('Clicked inside modal content, not closing');
-    }
+  confirm() {
+    this.hide()
+    this.dispatch('confirmed')
   }
 
-  handleEscape(event) {
-    if (event.key === 'Escape') {
-      console.log('ESC key pressed, closing modal');
-      this.close(event)
-    }
+  // Método para mostrar confirmação customizada
+  showConfirmation(title, content, onConfirm) {
+    this.titleValue = title
+    this.contentValue = content
+    this.show()
+    
+    this.element.addEventListener('modal:confirmed', onConfirm, { once: true })
   }
-} 
+}

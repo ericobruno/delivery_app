@@ -1,3 +1,5 @@
 <%= turbo_stream.replace "approve-order-#{@order.id}" do %>
-  <%= render 'approve_button', order: @order %>
+  <turbo-frame id="approve-order-<%= @order.id %>">
+    <span class="text-success fw-bold">✓ Aprovado</span>
+  </turbo-frame>
 <% end %> 

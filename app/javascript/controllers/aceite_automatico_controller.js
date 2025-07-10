@@ -141,37 +141,45 @@ export default class extends Controller {
   showMessage(type, message) {
     console.log('💬 Mostrando mensagem:', type, message);
     
-    // Remover mensagens existentes
-    const existingAlerts = document.querySelectorAll('.aceite-automatico-alert');
-    existingAlerts.forEach(alert => alert.remove());
+    // Criar toast personalizado
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
     
-    // Criar alerta temporário
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show position-fixed aceite-automatico-alert`;
-    alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
-    alert.innerHTML = `
-      <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
     `;
     
-    document.body.appendChild(alert);
+    // Container para toasts
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container position-fixed top-0 end-0 p-3';
+      container.style.zIndex = '1055';
+      document.body.appendChild(container);
+    }
     
-    // Auto-remove após 4 segundos
+    container.appendChild(toast);
+    
+    // Mostrar toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Remover após 5 segundos
     setTimeout(() => {
-      if (alert.parentNode) {
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateX(100%)';
-        setTimeout(() => alert.remove(), 300);
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
       }
-    }, 4000);
+    }, 5000);
   }
 
   getCSRFToken() {
-    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    if (!token) {
-      console.error('❌ CSRF token não encontrado!');
-    }
-    return token;
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
   }
-} 
+}
