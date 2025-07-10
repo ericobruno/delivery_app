@@ -1,34 +1,25 @@
 <!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
 
-<div class="card border-0 shadow-sm" style="max-width: 300px;">
-  <div class="card-body text-center">
-    <div class="d-flex align-items-center justify-content-center mb-3">
-      <i class="<%= Setting.aceite_automatico? ? 'fas fa-toggle-on text-danger' : 'fas fa-toggle-off text-success' %> me-2 fs-4"></i>
-      <span class="badge <%= Setting.aceite_automatico? ? 'bg-danger bg-opacity-10 text-danger' : 'bg-success bg-opacity-10 text-success' %>">
-        <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %>
-      </span>
-    </div>
+<div data-controller="aceite-automatico" 
+     data-aceite-automatico-status-value="<%= Setting.aceite_automatico? %>"
+     data-aceite-automatico-url-value="<%= admin_toggle_aceite_automatico_path %>">
+  
+  <button data-aceite-automatico-target="button" 
+          data-action="click->aceite-automatico#toggle"
+          class="btn <%= Setting.aceite_automatico? ? 'btn-outline-danger' : 'btn-outline-success' %> btn-lg">
     
-    <div data-controller="aceite-automatico" 
-         data-aceite-automatico-status-value="<%= Setting.aceite_automatico? %>"
-         data-aceite-automatico-url-value="<%= admin_toggle_aceite_automatico_path %>">
-      
-      <button data-aceite-automatico-target="button" 
-              data-action="click->aceite-automatico#toggle"
-              class="btn <%= Setting.aceite_automatico? ? 'btn-outline-danger' : 'btn-outline-success' %> btn-lg w-100 position-relative">
-        
-        <span class="button-text">
-          <%= Setting.aceite_automatico? ? 'Desativar Aceite Automático' : 'Ativar Aceite Automático' %>
-        </span>
-        
-        <div class="spinner-border spinner-border-sm d-none" role="status">
-          <span class="visually-hidden">Carregando...</span>
-        </div>
-      </button>
-    </div>
+    <span class="button-text">
+      <%= Setting.aceite_automatico? ? 'Desativar Aceite Automático' : 'Ativar Aceite Automático' %>
+    </span>
     
-    <small class="text-muted mt-2 d-block">
-      <%= Setting.aceite_automatico? ? 'Pedidos são aprovados automaticamente' : 'Pedidos precisam de aprovação manual' %>
+    <div class="spinner-border spinner-border-sm d-none" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </button>
+  
+  <div class="mt-2">
+    <small class="text-muted">
+      Status: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %>
     </small>
   </div>
 </div> 
