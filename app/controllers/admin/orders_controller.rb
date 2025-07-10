@@ -41,8 +41,9 @@ class Admin::OrdersController < ApplicationController
 
   def accept
     @order = Order.find(params[:id])
-    if @order.status == 'ag_aprovacao'
-      @order.update!(status: 'novo')
+    service = OrderStatusService.new(@order)
+    
+    if service.approve!
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to admin_order_path(@order), notice: 'Pedido aceito com sucesso!' }

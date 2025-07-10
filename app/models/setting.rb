@@ -1,20 +1,40 @@
 class Setting < ApplicationRecord
   validates :key, presence: true, uniqueness: true
 
+  # Cache para melhorar performance
+  CACHE_EXPIRATION = 5.minutes
+
   def self.get(key)
-    find_by(key: key)&.value
+    Rails.cache.fetch("setting_#{key}", expires_in: CACHE_EXPIRATION) do
+      find_by(key: key)&.value
+    end
   end
 
   def self.set(key, value)
     record = find_or_initialize_by(key: key)
     record.value = value
     record.save!
-    # Força o reload do cache
+    
+    # Invalidar cache
     Rails.cache.delete("setting_#{key}")
   end
 
   def self.aceite_automatico?
-    # Força a recarga do valor do banco
     get('aceite_automatico') == 'on'
+  end
+
+  def self.aceite_automatico_force_reload!
+    Rails.cache.delete("setting_aceite_automatico")
+    aceite_automatico?
+  end
+
+  # Método para verificar se uma configuração existe
+  def self.exists?(key)
+    exists?(key: key)
+  end
+
+  # Método para obter configuração com valor padrão
+  def self.get_with_default(key, default_value = nil)
+    get(key) || default_value
   end
 end 
