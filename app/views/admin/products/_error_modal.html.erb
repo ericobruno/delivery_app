@@ -1,0 +1,29 @@
+<turbo-frame id="modal">
+  <div class="modal fade show" style="display:block; background:rgba(0,0,0,0.5);" tabindex="-1" data-controller="modal" data-action="click->modal#closeBackground">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Não foi possível excluir o produto
+          </h5>
+          <button type="button" class="btn-close" data-action="click->modal#close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <strong><%= product.name %></strong> não pode ser excluído.
+          </div>
+          <p class="text-danger">
+            <strong>Motivo:</strong> <%= error_message %>
+          </p>
+          <p class="text-muted">
+            Para excluir este produto, você precisa primeiro remover todas as referências a ele nos pedidos existentes.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-action="click->modal#close">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</turbo-frame> 

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Controllers</title>
+    <meta name="csrf-token" content="test-token">
+    <script src="http://localhost:3001/assets/application.js"></script>
+</head>
+<body>
+    <h1>Teste de Controllers</h1>
+    
+    <div data-controller="aceite-automatico" data-aceite-automatico-status-value="false">
+        <button data-action="click->aceite-automatico#toggle">
+            Teste Aceite Automático
+        </button>
+    </div>
+    
+    <div data-controller="modal">
+        <button data-action="click->modal#open">
+            Teste Modal
+        </button>
+    </div>
+    
+    <script>
+        console.log('Página carregada');
+        console.log('Stimulus disponível:', typeof Stimulus !== 'undefined');
+        console.log('Turbo disponível:', typeof Turbo !== 'undefined');
+    </script>
+</body>
+</html> 
