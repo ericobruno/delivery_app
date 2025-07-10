@@ -1,16 +1,11 @@
 class Admin::DashboardController < ApplicationController
-  def index
-    # Filtro padrão: mostrar pedidos do dia atual
-    from = params[:from].present? ? Date.parse(params[:from]) : Date.today
-    to = params[:to].present? ? Date.parse(params[:to]) : Date.today
+  include DashboardFilterable
 
-    # Filtro pelo campo scheduled_for
-    @orders = Order.where(scheduled_for: from.beginning_of_day..to.end_of_day)
+  def index
+    @orders = filter_orders_by_date
     @statuses = Order.distinct.pluck(:status).compact
-    @orders_by_status = @statuses.index_with { |status| @orders.where(status: status).count }
-    @filtered_orders = params[:status].present? ? @orders.where(status: params[:status]).order(scheduled_for: :asc).limit(20) : @orders.order(scheduled_for: :asc).limit(20)
-    @from = from
-    @to = to
+    @orders_by_status = get_orders_by_status(@orders)
+    @filtered_orders = get_filtered_orders(@orders)
 
     if turbo_frame_request?
       if request.headers["Turbo-Frame"].to_s == "pedidos"
