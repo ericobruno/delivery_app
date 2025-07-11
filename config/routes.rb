@@ -4,6 +4,15 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: 'dashboard#index'
     post 'toggle_aceite_automatico', to: 'dashboard#toggle_aceite_automatico', as: :toggle_aceite_automatico
+    get 'test', to: 'dashboard#index'  # Rota de teste simples
+    
+    # Configurações de agendamento
+    get 'scheduling', to: 'scheduling#index'
+    patch 'scheduling/configuration', to: 'scheduling#update_configuration'
+    patch 'scheduling/availability', to: 'scheduling#update_availability'
+    post 'scheduling/move_orders_to_production', to: 'scheduling#move_orders_to_production'
+    get 'test-scheduling', to: 'scheduling#index'
+    
     resources :products do
       member do
         get :confirm_destroy
@@ -13,6 +22,7 @@ Rails.application.routes.draw do
       member do
         post :accept
         patch :update_status
+        post :cancel_scheduled_order
       end
     end
     resources :customers

@@ -37,4 +37,21 @@ class Setting < ApplicationRecord
   def self.get_with_default(key, default_value = nil)
     get(key) || default_value
   end
+
+  # Métodos para agendamento
+  def self.scheduling_enabled?
+    get('scheduling_enabled') == 'on'
+  end
+
+  def self.same_day_scheduling_enabled?
+    get('same_day_scheduling_enabled') == 'on'
+  end
+
+  def self.closed_store_scheduling_enabled?
+    get('closed_store_scheduling_enabled') == 'on'
+  end
+
+  def self.automatic_acceptance_enabled?
+    get('acceptance_mode') == 'automatic'
+  end
 end 

@@ -14,12 +14,26 @@ class Admin::OrdersController < ApplicationController
   end
 
   def create
-    status = Setting.aceite_automatico? ? 'producao' : 'ag_aprovacao'
-    @order = Order.new(order_params.merge(status: status))
-    if @order.save
-      redirect_to admin_order_path(@order), notice: 'Pedido criado com sucesso.'
+    @order = Order.new(order_params)
+    
+    # Se o pedido tem agendamento, usar o serviço de agendamento
+    if @order.scheduled_for.present?
+      scheduling_service = OrderSchedulingService.new
+      if scheduling_service.schedule_order(@order, @order.scheduled_for)
+        redirect_to admin_order_path(@order), notice: 'Pedido agendado com sucesso.'
+      else
+        render :new, status: :unprocessable_entity
+      end
     else
-      render :new, status: :unprocessable_entity
+      # Comportamento padrão para pedidos sem agendamento
+      status = Setting.automatic_acceptance_enabled? ? 'producao' : 'novo'
+      @order.status = status
+      
+      if @order.save
+        redirect_to admin_order_path(@order), notice: 'Pedido criado com sucesso.'
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
   end
 
@@ -85,6 +99,16 @@ class Admin::OrdersController < ApplicationController
         error: 'Erro ao atualizar status',
         errors: @order.errors.full_messages 
       }, status: :unprocessable_entity
+    end
+  end
+
+  def cancel_scheduled_order
+    scheduling_service = OrderSchedulingService.new
+    
+    if scheduling_service.cancel_scheduled_order(@order)
+      redirect_to admin_order_path(@order), notice: 'Pedido agendado cancelado com sucesso.'
+    else
+      redirect_to admin_order_path(@order), alert: 'Não foi possível cancelar o pedido agendado.'
     end
   end
 

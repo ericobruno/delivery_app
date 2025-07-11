@@ -1,0 +1,49 @@
+<div class="card shadow-sm">
+  <div class="card-header bg-warning text-dark">
+    <h6 class="card-title mb-0">
+      <i class="fas fa-bell"></i>
+      Notificações de Agendamento
+    </h6>
+  </div>
+  <div class="card-body">
+    <% notifications = [] %>
+    
+    <!-- Pedidos que devem ir para produção -->
+    <% production_orders = Order.where(status: 'novo').where.not(scheduled_for: nil).select { |order| order.should_move_to_production? } %>
+    <% if production_orders.any? %>
+      <% notifications << { type: 'warning', message: "#{production_orders.count} pedidos devem ir para produção", icon: 'cogs' } %>
+    <% end %>
+    
+    <!-- Pedidos agendados para hoje -->
+    <% today_orders = Order.where.not(scheduled_for: nil).where(scheduled_for: Date.current.beginning_of_day..Date.current.end_of_day) %>
+    <% if today_orders.any? %>
+      <% notifications << { type: 'info', message: "#{today_orders.count} pedidos agendados para hoje", icon: 'calendar-day' } %>
+    <% end %>
+    
+    <!-- Pedidos próximos do prazo de cancelamento -->
+    <% cancellation_orders = Order.where.not(scheduled_for: nil).select { |order| !order.can_be_cancelled? && order.scheduled_for > Time.current } %>
+    <% if cancellation_orders.any? %>
+      <% notifications << { type: 'danger', message: "#{cancellation_orders.count} pedidos não podem mais ser cancelados", icon: 'ban' } %>
+    <% end %>
+    
+    <!-- Configuração inativa -->
+    <% unless @configuration.scheduling_enabled? %>
+      <% notifications << { type: 'secondary', message: "Agendamento está desativado", icon: 'toggle-off' } %>
+    <% end %>
+    
+    <% if notifications.any? %>
+      <% notifications.each do |notification| %>
+        <div class="alert alert-<%= notification[:type] %> alert-dismissible fade show" role="alert">
+          <i class="fas fa-<%= notification[:icon] %>"></i>
+          <strong><%= notification[:message] %></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="text-center text-muted">
+        <i class="fas fa-check-circle fa-2x mb-2"></i>
+        <p class="mb-0">Nenhuma notificação pendente</p>
+      </div>
+    <% end %>
+  </div>
+</div>

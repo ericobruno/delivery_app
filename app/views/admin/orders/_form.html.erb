@@ -17,14 +17,78 @@
     <%= form.label :status, 'Status', class: 'form-label' %>
     <%= form.select :status, options_for_select(['ag_aprovacao', 'producao', 'pronto'], order.status), {}, class: 'form-select', required: true %>
   </div>
-  <div class="col-md-6">
-    <%= form.label :scheduled_for, 'Data e hora para entrega', class: 'form-label' %>
-    <%= form.datetime_field :scheduled_for, class: 'form-control', required: false %>
-  </div>
-  <div class="col-md-6">
-    <%= form.label :scheduled_notes, 'Informações da entrega', class: 'form-label' %>
-    <%= form.text_field :scheduled_notes, class: 'form-control', required: false %>
-  </div>
+  <% if Setting.scheduling_enabled? %>
+    <div class="col-12">
+      <div class="card bg-light border-primary">
+        <div class="card-header bg-primary text-white">
+          <h6 class="card-title mb-0">
+            <i class="fas fa-calendar-alt"></i>
+            Configurações de Agendamento
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <%= form.label :scheduled_for, class: 'form-label fw-bold' do %>
+                <i class="fas fa-clock"></i>
+                Data e hora para entrega
+              <% end %>
+              <%= form.datetime_field :scheduled_for, class: 'form-control', required: false %>
+              <small class="form-text text-muted">
+                <i class="fas fa-info-circle"></i>
+                Agendamento disponível até <%= Date.current + Setting.get_with_default('scheduling_max_days', 90).to_i.days %> dias à frente
+              </small>
+            </div>
+            <div class="col-md-6">
+              <%= form.label :scheduled_notes, class: 'form-label fw-bold' do %>
+                <i class="fas fa-sticky-note"></i>
+                Observações do agendamento
+              <% end %>
+              <%= form.text_field :scheduled_notes, class: 'form-control', required: false, placeholder: 'Ex: Entregar no portão, ligar antes...' %>
+              <small class="form-text text-muted">
+                <i class="fas fa-info-circle"></i>
+                Informações adicionais para a entrega
+              </small>
+            </div>
+          </div>
+          
+          <!-- Informações de disponibilidade -->
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <div class="row">
+                  <div class="col-md-4">
+                    <strong><i class="fas fa-calendar-check"></i> Janela de Agendamento:</strong><br>
+                    <small>Hoje até <%= (Date.current + Setting.get_with_default('scheduling_max_days', 90).to_i.days).strftime("%d/%m/%Y") %></small>
+                  </div>
+                  <div class="col-md-4">
+                    <strong><i class="fas fa-clock"></i> Mesmo Dia:</strong><br>
+                    <small>
+                      <% if Setting.same_day_scheduling_enabled? %>
+                        <span class="badge bg-success">Permitido</span>
+                      <% else %>
+                        <span class="badge bg-secondary">Não permitido</span>
+                      <% end %>
+                    </small>
+                  </div>
+                  <div class="col-md-4">
+                    <strong><i class="fas fa-door-open"></i> Estabelecimento Fechado:</strong><br>
+                    <small>
+                      <% if Setting.closed_store_scheduling_enabled? %>
+                        <span class="badge bg-warning">Permitido</span>
+                      <% else %>
+                        <span class="badge bg-secondary">Não permitido</span>
+                      <% end %>
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
   <div class="col-12">
     <%= form.label :description, 'Descrição do pedido', class: 'form-label' %>
     <%= form.text_area :description, class: 'form-control', rows: 2 %>
