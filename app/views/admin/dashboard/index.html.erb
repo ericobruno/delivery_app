@@ -6,7 +6,11 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-  <div></div>
+  <div>
+    <% if Setting.scheduling_enabled? %>
+      <%= link_to '⚙️ Configurações de Agendamento', admin_scheduling_index_path, class: 'btn btn-outline-primary btn-sm' %>
+    <% end %>
+  </div>
   <div>
     <turbo-frame id="aceite-automatico-btn">
       <%= render 'aceite_automatico_button' %>

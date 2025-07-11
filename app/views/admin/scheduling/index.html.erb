@@ -1,0 +1,181 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Configurações de Agendamento</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with model: @configuration, url: admin_scheduling_update_configuration_path, method: :patch, local: true do |form| %>
+            
+            <!-- 1. Aceitar Agendamento -->
+            <div class="form-group">
+              <div class="custom-control custom-switch">
+                <%= form.check_box :scheduling_enabled, class: "custom-control-input", id: "scheduling_enabled" %>
+                <%= form.label :scheduling_enabled, "Aceitar Agendamento", class: "custom-control-label" %>
+              </div>
+              <small class="form-text text-muted">Permite que os clientes agendem pedidos para entrega ou retirada</small>
+            </div>
+
+            <!-- 2. Disponibilidade do Agendamento -->
+            <div class="form-group">
+              <%= form.label :max_days_ahead, "Dias à frente para agendamento" %>
+              <%= form.number_field :max_days_ahead, class: "form-control", min: 1, max: 365 %>
+              <small class="form-text text-muted">Quantos dias à frente o cliente pode agendar (máximo 365 dias)</small>
+            </div>
+
+            <!-- 3. Agendamento para o Mesmo Dia -->
+            <div class="form-group">
+              <div class="custom-control custom-switch">
+                <%= form.check_box :same_day_scheduling_enabled, class: "custom-control-input", id: "same_day_scheduling_enabled" %>
+                <%= form.label :same_day_scheduling_enabled, "Permitir Agendamento para o Mesmo Dia", class: "custom-control-label" %>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <%= form.label :same_day_intervals, "Intervalos para o mesmo dia" %>
+              <%= form.select :same_day_intervals, options_for_select([1, 2, 3, 4, 5], @configuration.same_day_intervals), {}, class: "form-control" %>
+            </div>
+
+            <!-- 4. Agendamento com Estabelecimento Fechado -->
+            <div class="form-group">
+              <div class="custom-control custom-switch">
+                <%= form.check_box :closed_store_scheduling_enabled, class: "custom-control-input", id: "closed_store_scheduling_enabled" %>
+                <%= form.label :closed_store_scheduling_enabled, "Permitir Agendamento com Estabelecimento Fechado", class: "custom-control-label" %>
+              </div>
+            </div>
+
+            <!-- 5. Modo Aceite -->
+            <div class="form-group">
+              <%= form.label :acceptance_mode, "Modo de Aceite" %>
+              <%= form.select :acceptance_mode, 
+                  options_for_select([
+                    ['Manual', 'manual'],
+                    ['Automático', 'automatic']
+                  ], @configuration.acceptance_mode), 
+                  {}, class: "form-control" %>
+              <small class="form-text text-muted">Manual: pedido deve ser aceito manualmente. Automático: pedido é aceito automaticamente</small>
+            </div>
+
+            <!-- 6. Intervalo de Tempo -->
+            <div class="form-group">
+              <%= form.label :time_unit, "Unidade de Tempo" %>
+              <%= form.select :time_unit, 
+                  options_for_select([
+                    ['Minuto', 'minute'],
+                    ['Hora', 'hour']
+                  ], @configuration.time_unit), 
+                  {}, class: "form-control" %>
+            </div>
+
+            <div class="form-group">
+              <%= form.label :time_interval, "Intervalo de Tempo" %>
+              <%= form.number_field :time_interval, class: "form-control", min: 1 %>
+              <small class="form-text text-muted">Intervalo entre os horários disponíveis para agendamento</small>
+            </div>
+
+            <!-- 7. Cancelamento de Pedido -->
+            <div class="form-group">
+              <%= form.label :cancellation_unit, "Unidade para Cancelamento" %>
+              <%= form.select :cancellation_unit, 
+                  options_for_select([
+                    ['Horas', 'hour'],
+                    ['Dias', 'day']
+                  ], @configuration.cancellation_unit), 
+                  {}, class: "form-control" %>
+            </div>
+
+            <div class="form-group">
+              <%= form.label :cancellation_value, "Tempo para Cancelamento" %>
+              <%= form.number_field :cancellation_value, class: "form-control", min: 1 %>
+              <small class="form-text text-muted">Tempo antes da entrega que o cancelamento é permitido</small>
+            </div>
+
+            <!-- 8. Passar Pedido para Produção -->
+            <div class="form-group">
+              <%= form.label :production_unit, "Unidade para Produção" %>
+              <%= form.select :production_unit, 
+                  options_for_select([
+                    ['Minutos', 'minute'],
+                    ['Horas', 'hour']
+                  ], @configuration.production_unit), 
+                  {}, class: "form-control" %>
+            </div>
+
+            <div class="form-group">
+              <%= form.label :production_value, "Tempo para Produção" %>
+              <%= form.number_field :production_value, class: "form-control", min: 1 %>
+              <small class="form-text text-muted">Tempo antes do horário agendado que o pedido deve ir para produção</small>
+            </div>
+
+            <div class="form-group">
+              <%= form.submit "Salvar Configurações", class: "btn btn-primary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disponibilidade de Horários -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Disponibilidade de Horários por Dia da Semana</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: admin_scheduling_update_availability_path, method: :patch, local: true do |form| %>
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Dia</th>
+                    <% SchedulingAvailability::TIME_SLOTS.each do |slot| %>
+                      <th><%= slot %></th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @availability.each do |availability| %>
+                    <tr>
+                      <td><strong><%= availability.day_of_week.humanize %></strong></td>
+                      <% SchedulingAvailability::TIME_SLOTS.each do |slot| %>
+                        <td>
+                          <%= form.check_box "availability[#{availability.day_of_week}][]", 
+                              { checked: availability.available_slots.include?(slot) }, 
+                              slot, 
+                              nil %>
+                        </td>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+            <div class="form-group">
+              <%= form.submit "Salvar Disponibilidade", class: "btn btn-success" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Ações</h3>
+        </div>
+        <div class="card-body">
+          <%= link_to "Mover Pedidos para Produção", admin_scheduling_move_orders_to_production_path, 
+              method: :post, 
+              class: "btn btn-warning",
+              data: { confirm: "Tem certeza que deseja mover os pedidos agendados para produção?" } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

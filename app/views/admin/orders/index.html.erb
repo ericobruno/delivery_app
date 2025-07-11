@@ -9,6 +9,7 @@
       <th>ID</th>
       <th>Cliente</th>
       <th>Status</th>
+      <th>Agendamento</th>
       <th>Total</th>
       <th></th>
     </tr>
@@ -19,6 +20,18 @@
         <td>#<%= order.id %></td>
         <td><%= order.customer&.name %></td>
         <td><%= order.status %></td>
+        <td>
+          <% if order.scheduled_for.present? %>
+            <span class="badge bg-info">
+              📅 <%= order.scheduled_for.strftime("%d/%m %H:%M") %>
+            </span>
+            <% if order.scheduled_notes.present? %>
+              <br><small class="text-muted"><%= truncate(order.scheduled_notes, length: 30) %></small>
+            <% end %>
+          <% else %>
+            <span class="text-muted">-</span>
+          <% end %>
+        </td>
         <td>R$ <%= number_to_currency(order.order_items.sum { |item| item.price.to_f * item.quantity }, unit: '', separator: ',', delimiter: '.') %></td>
         <td>
           <%= link_to 'Ver', admin_order_path(order), class: 'btn btn-sm btn-outline-secondary' %>

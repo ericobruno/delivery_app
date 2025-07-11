@@ -17,14 +17,19 @@
     <%= form.label :status, 'Status', class: 'form-label' %>
     <%= form.select :status, options_for_select(['ag_aprovacao', 'producao', 'pronto'], order.status), {}, class: 'form-select', required: true %>
   </div>
-  <div class="col-md-6">
-    <%= form.label :scheduled_for, 'Data e hora para entrega', class: 'form-label' %>
-    <%= form.datetime_field :scheduled_for, class: 'form-control', required: false %>
-  </div>
-  <div class="col-md-6">
-    <%= form.label :scheduled_notes, 'Informações da entrega', class: 'form-label' %>
-    <%= form.text_field :scheduled_notes, class: 'form-control', required: false %>
-  </div>
+  <% if Setting.scheduling_enabled? %>
+    <div class="col-md-6">
+      <%= form.label :scheduled_for, 'Data e hora para entrega', class: 'form-label' %>
+      <%= form.datetime_field :scheduled_for, class: 'form-control', required: false %>
+      <small class="form-text text-muted">
+        Agendamento disponível até <%= Date.current + Setting.get_with_default('scheduling_max_days', 90).to_i.days %> dias à frente
+      </small>
+    </div>
+    <div class="col-md-6">
+      <%= form.label :scheduled_notes, 'Observações do agendamento', class: 'form-label' %>
+      <%= form.text_field :scheduled_notes, class: 'form-control', required: false %>
+    </div>
+  <% end %>
   <div class="col-12">
     <%= form.label :description, 'Descrição do pedido', class: 'form-label' %>
     <%= form.text_area :description, class: 'form-control', rows: 2 %>
