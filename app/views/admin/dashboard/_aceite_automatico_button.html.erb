@@ -1,6 +1,107 @@
 <!-- TOGGLE SWITCH - ACEITE AUTOMÁTICO -->
 <!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
 
+<style>
+  .aceite-automatico-container {
+    max-width: 500px;
+  }
+  
+  .form-switch-lg .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+    background-color: #6c757d;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .form-switch-lg .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+  }
+  
+  .form-switch-lg .form-check-input:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+  
+  .form-switch-lg .form-check-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .toggle-label {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    user-select: none;
+  }
+  
+  .toggle-text {
+    transition: color 0.3s ease;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  
+  .form-check-input:checked + .toggle-label .toggle-text {
+    color: #198754;
+  }
+  
+  .form-check-input:not(:checked) + .toggle-label .toggle-text {
+    color: #6c757d;
+  }
+  
+  .aceite-automatico-container .card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .aceite-automatico-container .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  }
+  
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+  }
+  
+  .toggle-switch {
+    transform: scale(1.2);
+    transition: transform 0.2s ease;
+  }
+  
+  .toggle-switch:hover:not(:disabled) {
+    transform: scale(1.3);
+  }
+  
+  @keyframes switchAnimation {
+    0% { transform: scale(1.2); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1.2); }
+  }
+  
+  .toggle-switch.animating {
+    animation: switchAnimation 0.3s ease;
+  }
+</style>
+
 <div class="aceite-automatico-container" 
      data-controller="aceite-automatico" 
      data-aceite-automatico-url-value="<%= admin_toggle_aceite_automatico_path %>"
@@ -49,4 +150,62 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+
+<!-- DEBUG SCRIPT - REMOVER DEPOIS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔍 DEBUG TOGGLE SWITCH - Template carregado');
+  console.log('⏰ Timestamp:', new Date().toISOString());
+  
+  // Verificar se elementos existem
+  const container = document.querySelector('.aceite-automatico-container');
+  const toggle = document.querySelector('.toggle-switch');
+  const card = document.querySelector('.aceite-automatico-container .card');
+  
+  console.log('📋 Elementos encontrados:');
+  console.log('- Container:', !!container);
+  console.log('- Toggle switch:', !!toggle);
+  console.log('- Card:', !!card);
+  
+  // Verificar dependências
+  console.log('📦 Dependências:');
+  console.log('- Bootstrap:', typeof bootstrap !== 'undefined');
+  console.log('- Stimulus:', typeof Stimulus !== 'undefined');
+  console.log('- jQuery:', typeof $ !== 'undefined');
+  
+  if (toggle) {
+    const styles = window.getComputedStyle(toggle);
+    console.log('🎨 Estilos aplicados:');
+    console.log('- Width:', styles.width);
+    console.log('- Height:', styles.height);
+    console.log('- Transform:', styles.transform);
+    console.log('- Background:', styles.backgroundColor);
+    
+    // Estado do toggle
+    console.log('🔄 Estado do toggle:');
+    console.log('- Checked:', toggle.checked);
+    console.log('- Data controller:', toggle.getAttribute('data-aceite-automatico-target'));
+    console.log('- Data action:', toggle.getAttribute('data-action'));
+  }
+  
+  if (container) {
+    console.log('📊 Data attributes do container:');
+    console.log('- Controller:', container.getAttribute('data-controller'));
+    console.log('- URL:', container.getAttribute('data-aceite-automatico-url-value'));
+    console.log('- Status:', container.getAttribute('data-aceite-automatico-current-status-value'));
+  }
+  
+  // Teste visual - adicionar borda vermelha temporária
+  if (container) {
+    container.style.border = '2px solid red';
+    container.style.padding = '10px';
+    setTimeout(() => {
+      container.style.border = '';
+      container.style.padding = '';
+    }, 3000);
+  }
+  
+  console.log('✅ Debug concluído - verifique os logs acima');
+});
+</script> 
