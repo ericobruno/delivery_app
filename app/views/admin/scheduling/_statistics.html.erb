@@ -1,0 +1,182 @@
+<div class="row">
+  <div class="col-md-3 mb-3">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title mb-0">
+              <i class="fas fa-calendar-alt"></i>
+              Pedidos Agendados
+            </h4>
+            <h2 class="mb-0"><%= Order.where.not(scheduled_for: nil).count %></h2>
+          </div>
+          <div class="align-self-center">
+            <i class="fas fa-calendar-check fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-3">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title mb-0">
+              <i class="fas fa-cogs"></i>
+              Em Produção
+            </h4>
+            <h2 class="mb-0"><%= Order.where(status: 'producao').count %></h2>
+          </div>
+          <div class="align-self-center">
+            <i class="fas fa-industry fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-3">
+    <div class="card bg-warning text-dark">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title mb-0">
+              <i class="fas fa-clock"></i>
+              Aguardando
+            </h4>
+            <h2 class="mb-0"><%= Order.where(status: 'novo').count %></h2>
+          </div>
+          <div class="align-self-center">
+            <i class="fas fa-hourglass-half fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-3">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title mb-0">
+              <i class="fas fa-check-circle"></i>
+              Configuração
+            </h4>
+            <h2 class="mb-0">
+              <% if @configuration.scheduling_enabled? %>
+                <span class="badge bg-success">Ativa</span>
+              <% else %>
+                <span class="badge bg-secondary">Inativa</span>
+              <% end %>
+            </h2>
+          </div>
+          <div class="align-self-center">
+            <i class="fas fa-toggle-on fa-3x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gráfico de Status -->
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title mb-0">
+          <i class="fas fa-chart-pie"></i>
+          Distribuição por Status
+        </h6>
+      </div>
+      <div class="card-body">
+        <canvas id="statusChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title mb-0">
+          <i class="fas fa-calendar-week"></i>
+          Agendamentos por Dia da Semana
+        </h6>
+      </div>
+      <div class="card-body">
+        <canvas id="weekdayChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de Status
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+const statusChart = new Chart(statusCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Novo', 'Aguardando Aprovação', 'Em Produção', 'Pronto', 'Entregue', 'Cancelado'],
+    datasets: [{
+      data: [
+        <%= Order.where(status: 'novo').count %>,
+        <%= Order.where(status: 'ag_aprovacao').count %>,
+        <%= Order.where(status: 'producao').count %>,
+        <%= Order.where(status: 'pronto').count %>,
+        <%= Order.where(status: 'entregue').count %>,
+        <%= Order.where(status: 'cancelado').count %>
+      ],
+      backgroundColor: [
+        '#6c757d',
+        '#ffc107',
+        '#17a2b8',
+        '#28a745',
+        '#007bff',
+        '#dc3545'
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+
+// Gráfico de Agendamentos por Dia da Semana
+const weekdayCtx = document.getElementById('weekdayChart').getContext('2d');
+const weekdayChart = new Chart(weekdayCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+    datasets: [{
+      label: 'Pedidos Agendados',
+      data: [
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 0").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 1").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 2").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 3").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 4").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 5").count %>,
+        <%= Order.where.not(scheduled_for: nil).where("EXTRACT(dow FROM scheduled_for) = 6").count %>
+      ],
+      backgroundColor: '#007bff'
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+</script>

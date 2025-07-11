@@ -1,37 +1,98 @@
-<div class="card mb-3">
+<div class="card mb-3 shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="card-title mb-0">
+          <i class="fas fa-shopping-cart"></i>
+          Pedido #<%= @order.id %>
+        </h2>
+        <h6 class="card-subtitle mb-0 text-white-50">
+          <i class="fas fa-user"></i>
+          Cliente: <%= @order.customer&.name %>
+        </h6>
+      </div>
+      <div>
+        <span class="badge bg-light text-dark fs-6">
+          <i class="fas fa-tag"></i>
+          <%= @order.status.humanize %>
+        </span>
+      </div>
+    </div>
+  </div>
+  
   <div class="card-body">
-    <h2 class="card-title">Pedido #<%= @order.id %></h2>
-    <h6 class="card-subtitle mb-2 text-muted">Cliente: <%= @order.customer&.name %></h6>
-    <p class="card-text">Status: <span class="badge bg-info"><%= @order.status %></span></p>
-    
+    <!-- Informações de Agendamento -->
     <% if @order.scheduled_for.present? %>
-      <div class="alert alert-info">
-        <strong>📅 Pedido Agendado</strong><br>
-        <strong>Data/Hora:</strong> <%= @order.scheduled_for.strftime("%d/%m/%Y às %H:%M") %><br>
-        <% if @order.scheduled_notes.present? %>
-          <strong>Observações:</strong> <%= @order.scheduled_notes %>
-        <% end %>
-        
-        <% scheduling_service = OrderSchedulingService.new %>
-        <% if scheduling_service.validate_scheduling_time(@order.scheduled_for) %>
-          <span class="badge bg-success">Horário Disponível</span>
-        <% else %>
-          <span class="badge bg-warning">Horário Indisponível</span>
-        <% end %>
-        
-        <% if @order.can_be_cancelled? %>
-          <%= link_to 'Cancelar Agendamento', cancel_scheduled_order_admin_order_path(@order), 
-              method: :post, 
-              class: 'btn btn-sm btn-warning mt-2',
-              data: { confirm: 'Tem certeza que deseja cancelar este agendamento?' } %>
-        <% else %>
-          <span class="badge bg-secondary mt-2">Cancelamento não permitido</span>
-        <% end %>
+      <div class="alert alert-info border-0 shadow-sm">
+        <div class="row">
+          <div class="col-md-8">
+            <h6 class="alert-heading">
+              <i class="fas fa-calendar-alt text-primary"></i>
+              <strong>Pedido Agendado</strong>
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <p class="mb-1">
+                  <i class="fas fa-clock"></i>
+                  <strong>Data/Hora:</strong><br>
+                  <span class="fs-5 fw-bold text-primary">
+                    <%= @order.scheduled_for.strftime("%d/%m/%Y às %H:%M") %>
+                  </span>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <% scheduling_service = OrderSchedulingService.new %>
+                <% if scheduling_service.validate_scheduling_time(@order.scheduled_for) %>
+                  <span class="badge bg-success fs-6">
+                    <i class="fas fa-check-circle"></i> Horário Disponível
+                  </span>
+                <% else %>
+                  <span class="badge bg-warning fs-6">
+                    <i class="fas fa-exclamation-triangle"></i> Horário Indisponível
+                  </span>
+                <% end %>
+              </div>
+            </div>
+            
+            <% if @order.scheduled_notes.present? %>
+              <div class="mt-2">
+                <i class="fas fa-sticky-note"></i>
+                <strong>Observações:</strong><br>
+                <span class="text-muted"><%= @order.scheduled_notes %></span>
+              </div>
+            <% end %>
+          </div>
+          <div class="col-md-4 text-end">
+            <% if @order.can_be_cancelled? %>
+              <%= link_to cancel_scheduled_order_admin_order_path(@order), 
+                  method: :post, 
+                  class: 'btn btn-warning btn-sm',
+                  data: { 
+                    confirm: 'Tem certeza que deseja cancelar este agendamento?',
+                    turbo: false
+                  } do %>
+                <i class="fas fa-ban"></i> Cancelar Agendamento
+              <% end %>
+            <% else %>
+              <div class="alert alert-secondary mb-0">
+                <i class="fas fa-lock"></i>
+                <small>Cancelamento não permitido</small>
+              </div>
+            <% end %>
+          </div>
+        </div>
       </div>
     <% end %>
     
+    <!-- Descrição do Pedido -->
     <% if @order.description.present? %>
-      <p class="card-text"><strong>Descrição do pedido:</strong> <%= @order.description %></p>
+      <div class="alert alert-light border">
+        <h6 class="alert-heading">
+          <i class="fas fa-file-alt"></i>
+          <strong>Descrição do Pedido</strong>
+        </h6>
+        <p class="mb-0"><%= @order.description %></p>
+      </div>
     <% end %>
     <h5 class="mt-4">Itens do Pedido</h5>
     <table class="table table-sm table-bordered">
