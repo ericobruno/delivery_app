@@ -8,6 +8,9 @@ Rails.application.routes.draw do
     
     # Configurações de agendamento
     get 'scheduling', to: 'scheduling#index'
+    patch 'scheduling/configuration', to: 'scheduling#update_configuration'
+    patch 'scheduling/availability', to: 'scheduling#update_availability'
+    post 'scheduling/move_orders_to_production', to: 'scheduling#move_orders_to_production'
     get 'test-scheduling', to: 'scheduling#index'
     
     resources :products do
