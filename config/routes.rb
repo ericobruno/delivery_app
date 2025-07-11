@@ -6,10 +6,10 @@ Rails.application.routes.draw do
     post 'toggle_aceite_automatico', to: 'dashboard#toggle_aceite_automatico', as: :toggle_aceite_automatico
     
     # Configurações de agendamento
-    get 'scheduling', to: 'scheduling#index', as: :scheduling_index
-    patch 'scheduling/configuration', to: 'scheduling#update_configuration', as: :scheduling_update_configuration
-    patch 'scheduling/availability', to: 'scheduling#update_availability', as: :scheduling_update_availability
-    post 'scheduling/move_orders_to_production', to: 'scheduling#move_orders_to_production', as: :scheduling_move_orders_to_production
+    get 'scheduling', to: 'scheduling#index'
+    patch 'scheduling/configuration', to: 'scheduling#update_configuration'
+    patch 'scheduling/availability', to: 'scheduling#update_availability'
+    post 'scheduling/move_orders_to_production', to: 'scheduling#move_orders_to_production'
     
     resources :products do
       member do

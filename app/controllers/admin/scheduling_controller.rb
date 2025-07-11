@@ -1,10 +1,9 @@
 class Admin::SchedulingController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_configuration
-  before_action :load_availability
 
   def index
-    @scheduling_service = SchedulingService.new(@configuration)
+    # Temporariamente, vamos apenas renderizar uma página simples
+    render plain: "Página de Configurações de Agendamento - Funcionando!"
   end
 
   def update_configuration
