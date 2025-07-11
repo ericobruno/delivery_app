@@ -1,0 +1,85 @@
+<turbo-frame id="pedidos">
+  <!-- Debug Panel (apenas em desenvolvimento) -->
+  <% if Rails.env.development? %>
+    <%= render 'kanban_debug', orders: orders %>
+  <% end %>
+  
+  <!-- Toggle para alternar entre kanban e tabela -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Pedidos por Status</h3>
+    <div class="btn-group" role="group">
+      <input type="radio" class="btn-check" name="view-mode" id="kanban-view" checked autocomplete="off">
+      <label class="btn btn-outline-primary btn-sm" for="kanban-view">
+        <i class="fas fa-columns me-1"></i>
+        Kanban
+      </label>
+      
+      <input type="radio" class="btn-check" name="view-mode" id="table-view" autocomplete="off">
+      <label class="btn btn-outline-primary btn-sm" for="table-view">
+        <i class="fas fa-table me-1"></i>
+        Tabela
+      </label>
+    </div>
+  </div>
+  
+  <!-- Resumo dos status -->
+  <div class="row mb-4">
+    <% ['novo', 'ag_aprovacao', 'producao', 'pronto', 'entregue', 'cancelado'].each do |status| %>
+      <% color = case status.downcase
+        when 'novo' then 'primary'
+        when 'ag_aprovacao', 'ag aprovacao' then 'warning'
+        when 'producao', 'produção' then 'info'
+        when 'pronto' then 'success'
+        when 'entregue' then 'dark'
+        when 'cancelado' then 'danger'
+        else 'secondary'
+      end %>
+      <% count = @orders_by_status[status] || 0 %>
+      <div class="col-6 col-md-2 mb-2">
+        <div class="card text-bg-<%= color %> border-0 shadow-sm h-100">
+          <div class="card-body text-center py-2 d-flex flex-column justify-content-center">
+            <h6 class="card-title mb-1 text-capitalize" style="font-size: 0.875rem;">
+              <%= status.tr('_', ' ') %>
+            </h6>
+            <p class="h4 mb-0"><%= count %></p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Kanban Board -->
+  <div id="kanban-container">
+    <%= render 'kanban_board', orders: orders %>
+  </div>
+  
+  <!-- Tabela (hidden por padrão) -->
+  <div id="table-container" style="display: none;">
+    <%= render 'pedidos_table', orders: orders.limit(20) %>
+  </div>
+</turbo-frame>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const kanbanView = document.getElementById('kanban-view');
+  const tableView = document.getElementById('table-view');
+  const kanbanContainer = document.getElementById('kanban-container');
+  const tableContainer = document.getElementById('table-container');
+  
+  if (kanbanView && tableView && kanbanContainer && tableContainer) {
+    kanbanView.addEventListener('change', function() {
+      if (this.checked) {
+        kanbanContainer.style.display = 'block';
+        tableContainer.style.display = 'none';
+      }
+    });
+    
+    tableView.addEventListener('change', function() {
+      if (this.checked) {
+        kanbanContainer.style.display = 'none';
+        tableContainer.style.display = 'block';
+      }
+    });
+  }
+});
+</script> 

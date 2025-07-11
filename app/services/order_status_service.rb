@@ -6,22 +6,26 @@ class OrderStatusService
   def approve!
     return false unless can_approve?
     
-    @order.update!(status: 'novo')
+    @order.update!(status: 'producao')
     true
   end
 
   def can_approve?
-    @order.status == 'ag_aprovacao'
+    @order.status == 'novo' || @order.status == 'ag_aprovacao'
   end
 
   def next_status
     case @order.status
     when 'novo'
-      'em_preparacao'
-    when 'em_preparacao'
+      'ag_aprovacao'
+    when 'ag_aprovacao'
+      'producao'
+    when 'producao'
       'pronto'
     when 'pronto'
       'entregue'
+    when 'entregue'
+      nil # Status final
     else
       nil
     end
@@ -35,7 +39,7 @@ class OrderStatusService
   end
 
   def cancel!
-    return false if @order.status == 'entregue'
+    return false if ['entregue', 'cancelado'].include?(@order.status)
     
     @order.update!(status: 'cancelado')
     true
@@ -43,18 +47,18 @@ class OrderStatusService
 
   def status_transitions
     case @order.status
-    when 'ag_aprovacao'
-      ['novo']
     when 'novo'
-      ['em_preparacao', 'cancelado']
-    when 'em_preparacao'
-      ['pronto', 'cancelado']
+      ['ag_aprovacao', 'cancelado']
+    when 'ag_aprovacao'
+      ['novo', 'producao', 'cancelado']
+    when 'producao'
+      ['ag_aprovacao', 'pronto', 'cancelado']
     when 'pronto'
-      ['entregue', 'cancelado']
+      ['producao', 'entregue', 'cancelado']
     when 'entregue'
-      []
+      ['cancelado'] # Pode apenas ser cancelado
     when 'cancelado'
-      []
+      [] # Status final
     else
       []
     end

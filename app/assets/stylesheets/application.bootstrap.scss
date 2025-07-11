@@ -73,3 +73,157 @@ turbo-frame[loading] {
     font-size: 16px; // Prevents zoom on iOS
   }
 }
+
+// ===== KANBAN STYLES =====
+
+.kanban-board {
+  min-height: 600px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.kanban-columns {
+  min-height: 500px;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.kanban-column {
+  background: #ffffff;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  min-width: 300px;
+  flex: 1;
+  
+  &.valid-drop {
+    border-color: #28a745;
+    background-color: #f8fff8;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+  }
+  
+  &.invalid-drop {
+    opacity: 0.5;
+    border-color: #dc3545;
+  }
+  
+  &.drop-valid {
+    border-color: #28a745 !important;
+    background-color: #f8fff8 !important;
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.4) !important;
+    transform: scale(1.02);
+  }
+  
+  &.drop-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff5f5 !important;
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.4) !important;
+    opacity: 0.7;
+  }
+}
+
+.kanban-cards {
+  min-height: 400px;
+}
+
+.kanban-card {
+  transition: all 0.2s ease;
+  cursor: move;
+  margin-bottom: 0.75rem;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  &.updating {
+    opacity: 0.7;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 10;
+    }
+  }
+}
+
+// Sortable.js states
+.sortable-ghost {
+  opacity: 0.5;
+  background: #f8f9fa;
+  border: 2px dashed #007bff;
+}
+
+.sortable-chosen {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.sortable-drag {
+  transform: rotate(2deg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+}
+
+// Status indicators
+.kanban-column[data-status="novo"] {
+  border-left: 4px solid #0d6efd;
+}
+
+.kanban-column[data-status="ag_aprovacao"] {
+  border-left: 4px solid #ffc107;
+}
+
+.kanban-column[data-status="producao"] {
+  border-left: 4px solid #0dcaf0;
+}
+
+.kanban-column[data-status="pronto"] {
+  border-left: 4px solid #198754;
+}
+
+.kanban-column[data-status="entregue"] {
+  border-left: 4px solid #495057;
+}
+
+.kanban-column[data-status="cancelado"] {
+  border-left: 4px solid #dc3545;
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .kanban-board {
+    padding: 0.5rem;
+  }
+  
+  .kanban-column {
+    min-width: 280px;
+  }
+  
+  .kanban-columns {
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+  }
+}

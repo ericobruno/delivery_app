@@ -1,0 +1,173 @@
+<div class="kanban-card card mb-3 shadow-sm" 
+     data-order-id="<%= order.id %>" 
+     data-status="<%= order.status %>">
+  
+  <div class="card-body p-3">
+    <!-- Header do card -->
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <div class="d-flex align-items-center">
+        <h6 class="card-title mb-0 fw-bold text-primary">
+          #<%= order.id %>
+        </h6>
+        <% if order.scheduled_for && order.scheduled_for > Time.current %>
+          <i class="fas fa-clock text-warning ms-2" 
+             title="Agendado para <%= l(order.scheduled_for, format: :short) %>"></i>
+        <% end %>
+      </div>
+      
+      <span class="badge status-badge <%= case order.status
+                                          when 'novo' then 'bg-primary'
+                                          when 'ag_aprovacao' then 'bg-warning text-dark'
+                                          when 'producao' then 'bg-info'
+                                          when 'pronto' then 'bg-success'
+                                          when 'entregue' then 'bg-dark'
+                                          when 'cancelado' then 'bg-danger'
+                                          else 'bg-secondary'
+                                        end %>">
+        <%= order.status.tr('_', ' ').titleize %>
+      </span>
+    </div>
+    
+    <!-- Informações do cliente -->
+    <div class="mb-2">
+      <p class="card-text mb-1">
+        <i class="fas fa-user text-muted me-1"></i>
+        <strong><%= order.customer&.name || 'Cliente não informado' %></strong>
+      </p>
+      <% if order.customer&.phone %>
+        <small class="text-muted">
+          <i class="fas fa-phone me-1"></i>
+          <%= order.customer.phone %>
+        </small>
+      <% end %>
+    </div>
+    
+    <!-- Itens do pedido (resumo) -->
+    <div class="mb-2">
+      <% total_items = order.order_items.sum(:quantity) %>
+      <small class="text-muted">
+        <i class="fas fa-shopping-bag me-1"></i>
+        <%= total_items %> <%= total_items == 1 ? 'item' : 'itens' %>
+        
+        <% if order.order_items.limit(2).any? %>
+          <span class="ms-1">
+            <%= order.order_items.limit(2).map { |item| item.product&.name }.compact.join(', ') %>
+            <% if order.order_items.count > 2 %>
+              <span class="text-primary">+<%= order.order_items.count - 2 %></span>
+            <% end %>
+          </span>
+        <% end %>
+      </small>
+    </div>
+    
+    <!-- Valor total -->
+    <div class="mb-2">
+      <% total = order.order_items.sum { |item| item.price.to_f * item.quantity } %>
+      <strong class="text-success">
+        R$ <%= number_to_currency(total, unit: '', separator: ',', delimiter: '.') %>
+      </strong>
+    </div>
+    
+    <!-- Informações de tempo -->
+    <div class="mb-2">
+      <small class="text-muted">
+        <i class="fas fa-calendar me-1"></i>
+        <%= l(order.created_at, format: :short) %>
+        
+        <% if order.scheduled_for %>
+          <br>
+          <i class="fas fa-truck me-1"></i>
+          Entrega: <%= l(order.scheduled_for, format: :short) %>
+        <% end %>
+      </small>
+    </div>
+    
+    <!-- Observações da entrega -->
+    <% if order.scheduled_notes.present? %>
+      <div class="mb-2">
+        <small class="text-info">
+          <i class="fas fa-sticky-note me-1"></i>
+          <%= truncate(order.scheduled_notes, length: 40) %>
+        </small>
+      </div>
+    <% end %>
+    
+    <!-- Descrição do pedido -->
+    <% if order.description.present? %>
+      <div class="mb-2">
+        <small class="text-muted">
+          <i class="fas fa-comment me-1"></i>
+          <%= truncate(order.description, length: 50) %>
+        </small>
+      </div>
+    <% end %>
+    
+    <!-- Ações rápidas -->
+    <div class="card-actions pt-2 border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="btn-group" role="group">
+          <%= link_to admin_order_path(order), 
+                      class: 'btn btn-sm btn-outline-secondary',
+                      title: 'Ver detalhes',
+                      data: { turbo: false } do %>
+            <i class="fas fa-eye"></i>
+          <% end %>
+          
+          <%= link_to edit_admin_order_path(order), 
+                      class: 'btn btn-sm btn-outline-primary',
+                      title: 'Editar',
+                      data: { turbo: false } do %>
+            <i class="fas fa-edit"></i>
+          <% end %>
+        </div>
+        
+        <!-- Ações específicas por status -->
+        <div class="status-actions">
+          <% case order.status %>
+          <% when 'novo' %>
+            <small class="text-primary">
+              <i class="fas fa-star me-1"></i>
+              Novo pedido
+            </small>
+          <% when 'ag_aprovacao' %>
+            <%= button_to accept_admin_order_path(order), 
+                          method: :post,
+                          class: 'btn btn-sm btn-success',
+                          title: 'Aprovar pedido',
+                          data: { 
+                            turbo: true,
+                            confirm: 'Aprovar este pedido?'
+                          } do %>
+              <i class="fas fa-check"></i>
+            <% end %>
+          <% when 'producao' %>
+            <small class="text-info">
+              <i class="fas fa-clock me-1"></i>
+              Em produção...
+            </small>
+          <% when 'pronto' %>
+            <small class="text-success">
+              <i class="fas fa-truck me-1"></i>
+              Pronto para entrega!
+            </small>
+          <% when 'entregue' %>
+            <small class="text-success">
+              <i class="fas fa-check-circle me-1"></i>
+              Entregue
+            </small>
+          <% when 'cancelado' %>
+            <small class="text-danger">
+              <i class="fas fa-times-circle me-1"></i>
+              Cancelado
+            </small>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Indicador visual para drag -->
+  <div class="kanban-card-drag-indicator">
+    <i class="fas fa-grip-vertical text-muted"></i>
+  </div>
+</div> 

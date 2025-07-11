@@ -15,3 +15,6 @@ application.register("order-actions", OrderActionsController)
 
 import ModalController from "./modal_controller"
 application.register("modal", ModalController)
+
+import KanbanController from "./kanban_controller"
+application.register("kanban", KanbanController)

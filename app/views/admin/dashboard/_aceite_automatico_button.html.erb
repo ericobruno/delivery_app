@@ -1,22 +1,153 @@
-<!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
+<!-- Toggle Switch Real para Aceite Automático -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-3">
+    
+    <div class="d-flex align-items-center justify-content-between">
+      
+      <!-- Informações do toggle -->
+      <div class="d-flex align-items-center">
+        <i class="fas fa-robot text-primary me-3 fs-4"></i>
+        
+        <div>
+          <h6 class="mb-1 fw-bold">
+            Aceite Automático <%= Setting.aceite_automatico? ? 'ATIVADO' : 'DESATIVADO' %>
+          </h6>
+          <small class="text-muted">
+            <% if Setting.aceite_automatico? %>
+              Pedidos novos entram automaticamente com status "NOVO"
+            <% else %>
+              Pedidos novos entram com status "AG. APROVAÇÃO" para revisão manual
+            <% end %>
+          </small>
+        </div>
+      </div>
+      
+      <!-- Toggle Switch Funcional -->
+      <div class="d-flex align-items-center">
+        <span class="badge me-3 <%= Setting.aceite_automatico? ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary' %>">
+          <%= Setting.aceite_automatico? ? 'ATIVADO' : 'DESATIVADO' %>
+        </span>
+        
+        <!-- Form para toggle -->
+        <%= form_with url: admin_toggle_aceite_automatico_path, method: :post, local: false, class: "toggle-form", data: { turbo_frame: "aceite-automatico-btn" } do |f| %>
+          <div class="toggle-switch-container">
+            <input type="hidden" name="status" value="<%= Setting.aceite_automatico? ? 'off' : 'on' %>">
+            <button type="submit" 
+                    class="toggle-switch-btn"
+                    onclick="return confirm('Confirma <%= Setting.aceite_automatico? ? 'DESATIVAR' : 'ATIVAR' %> o aceite automático?\\n\\nQuando ATIVADO: Pedidos novos entram com status \"NOVO\"\\nQuando DESATIVADO: Pedidos novos entram com status \"AG. APROVAÇÃO\"')">
+              
+              <!-- Toggle visual -->
+              <div class="toggle-switch-visual <%= 'active' if Setting.aceite_automatico? %>">
+                <div class="toggle-switch-slider"></div>
+              </div>
+            </button>
+          </div>
+        <% end %>
+      </div>
+      
+    </div>
+  </div>
+</div>
 
-<div data-controller="aceite-automatico" 
-     data-aceite-automatico-url-value="<%= admin_toggle_aceite_automatico_path %>"
-     data-aceite-automatico-current-status-value="<%= Setting.aceite_automatico? ? 'on' : 'off' %>">
-  
-  <% if Setting.aceite_automatico? %>
-    <button data-aceite-automatico-target="button" 
-            data-action="click->aceite-automatico#toggle"
-            class="btn btn-success btn-sm" 
-            data-status="on">
-      Aceite automático ON
-    </button>
-  <% else %>
-    <button data-aceite-automatico-target="button" 
-            data-action="click->aceite-automatico#toggle"
-            class="btn btn-outline-secondary btn-sm" 
-            data-status="off">
-      Aceite automático OFF
-    </button>
-  <% end %>
-</div> 
+<style>
+.toggle-form {
+  display: inline-block;
+}
+
+.toggle-switch-container {
+  position: relative;
+  display: inline-block;
+}
+
+.toggle-switch-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+}
+
+.toggle-switch-visual {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch-visual.active {
+  background-color: #28a745;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 3px rgba(40, 167, 69, 0.2);
+}
+
+.toggle-switch-slider {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch-visual.active .toggle-switch-slider {
+  transform: translateX(26px);
+}
+
+.toggle-switch-btn:hover .toggle-switch-visual {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.toggle-switch-btn:disabled .toggle-switch-visual {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+/* Loading state */
+.toggle-form[data-turbo-submitting] .toggle-switch-visual {
+  opacity: 0.7;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+</style>
+
+<script>
+document.addEventListener('turbo:submit-start', function(event) {
+  if (event.target.classList.contains('toggle-form')) {
+    console.log('🚀 Submissão do toggle iniciada');
+  }
+});
+
+document.addEventListener('turbo:submit-end', function(event) {
+  if (event.target.classList.contains('toggle-form')) {
+    console.log('✅ Submissão do toggle finalizada');
+  }
+});
+</script> 

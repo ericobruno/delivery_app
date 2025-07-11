@@ -1,147 +1,188 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { status: Boolean }
-
-  initialize() {
-    console.log('🎯 Aceite Automático Controller inicializado');
+  static values = { 
+    status: Boolean,
+    url: String
   }
+  
+  static targets = ["toggle", "label", "icon", "statusText"]
 
   connect() {
-    console.log('🎯 Aceite Automático Controller conectado');
+    console.log('🎯 Aceite Automático Toggle Controller conectado');
     console.log('📊 Status inicial:', this.statusValue);
     console.log('🔗 Elemento:', this.element);
     console.log('🔍 Data attributes:', {
       controller: this.element.dataset.controller,
       statusValue: this.element.dataset.aceiteAutomaticoStatusValue,
-      action: this.element.dataset.action
+      urlValue: this.element.dataset.aceiteAutomaticoUrlValue
     });
-    
-    // Adicionar classe para animações
-    this.element.classList.add('aceite-automatico-button');
+    this.updateToggleDisplay();
+  }
+
+  disconnect() {
+    console.log('🔌 Aceite Automático Controller desconectado');
+  }
+
+  test(event) {
+    console.log('🧪 TESTE: Stimulus está funcionando!');
+    alert('✅ Stimulus funcionando! Controller conectado com sucesso.');
+    console.log('🧪 TESTE: Evento recebido:', event);
+    console.log('🧪 TESTE: Status atual:', this.statusValue);
   }
 
   async toggle(event) {
     event.preventDefault();
     event.stopPropagation();
     
-    console.log('🔄 Toggle iniciado');
+    console.log('🔄 Toggle aceite automático iniciado');
     console.log('🔍 Evento:', event);
+    console.log('🔍 Checkbox checked:', this.toggleTarget.checked);
     
-    const button = this.element;
-    const currentStatus = this.statusValue;
-    const newStatus = !currentStatus;
-    
-    console.log(`🔄 Toggle: ${currentStatus} -> ${newStatus}`);
-    console.log('🔍 Button element:', button);
-    
-    // Confirmação simples
+    // Obter o novo status baseado no estado do checkbox
+    const newStatus = this.toggleTarget.checked;
     const actionText = newStatus ? 'ATIVAR' : 'DESATIVAR';
-    if (!confirm(`Confirma ${actionText} o aceite automático?`)) {
-      console.log('❌ Usuário cancelou');
+    
+    console.log(`🔄 Toggle: ${this.statusValue} -> ${newStatus}`);
+    
+    // Confirmação com mensagem mais clara
+    if (!confirm(`Confirma ${actionText} o aceite automático?\n\nQuando ATIVADO: Pedidos novos entram com status "NOVO"\nQuando DESATIVADO: Pedidos novos entram com status "AG. APROVAÇÃO"`)) {
+      console.log('❌ Usuário cancelou toggle');
+      // Reverter o toggle se cancelado
+      this.toggleTarget.checked = !newStatus;
       return;
     }
     
-    // Animar botão
-    this.animateButton(true);
+    // Animar toggle durante processamento
+    this.animateToggle(true);
     
     try {
       const token = this.getCSRFToken();
-      console.log('🔑 CSRF Token:', token);
+      console.log('🔑 CSRF Token obtido:', token ? 'OK' : 'FALHOU');
       
       const response = await fetch('/admin/toggle_aceite_automatico', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'X-CSRF-Token': token,
-          'Accept': 'application/json'
+          'Accept': 'application/json, text/vnd.turbo-stream.html'
         },
         body: `status=${newStatus ? 'on' : 'off'}`
       });
 
-      console.log('📡 Resposta:', response.status);
+      console.log('📡 Resposta do servidor:', response.status);
+      console.log('📡 Headers:', response.headers);
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
       }
       
-      const data = await response.json();
-      console.log('✅ Sucesso:', data);
+      // Verificar se é Turbo Stream
+      const contentType = response.headers.get('content-type');
+      console.log('📡 Content-Type:', contentType);
       
-      // Atualizar estado
-      this.statusValue = newStatus;
-      this.updateButton(newStatus);
-      
-      // Mostrar mensagem de sucesso
-      this.showMessage('success', data.message || 'Status atualizado com sucesso!');
+      if (contentType && contentType.includes('text/vnd.turbo-stream.html')) {
+        // Processar Turbo Stream
+        const html = await response.text();
+        console.log('📡 Turbo Stream HTML:', html);
+        Turbo.renderStreamMessage(html);
+        console.log('✅ Turbo Stream processado');
+      } else {
+        // Processar JSON
+        const data = await response.json();
+        console.log('✅ Toggle realizado com sucesso:', data);
+        
+        // Atualizar estado local
+        this.statusValue = newStatus;
+        this.updateToggleDisplay();
+        
+        // Mostrar mensagem de sucesso
+        this.showSuccessMessage(data.message || `Aceite automático ${newStatus ? 'ativado' : 'desativado'} com sucesso!`);
+      }
       
     } catch (error) {
-      console.error('❌ Erro:', error);
-      this.showMessage('danger', 'Erro ao atualizar status: ' + error.message);
-    } finally {
-      this.animateButton(false);
-    }
-  }
-
-  animateButton(loading) {
-    const button = this.element;
-    const buttonText = button.querySelector('.button-text');
-    const spinner = button.querySelector('.spinner-border');
-    
-    if (loading) {
-      // Estado de loading
-      button.disabled = true;
-      button.classList.add('btn-loading');
-      buttonText.style.display = 'none';
-      spinner.classList.remove('d-none');
+      console.error('❌ Erro no toggle:', error);
+      this.showErrorMessage(`Erro ao ${newStatus ? 'ativar' : 'desativar'} aceite automático: ${error.message}`);
       
-      // Adicionar animação de pulse
-      button.style.animation = 'pulse 1s infinite';
-    } else {
-      // Estado normal
-      button.disabled = false;
-      button.classList.remove('btn-loading');
-      buttonText.style.display = 'inline';
-      spinner.classList.add('d-none');
-      button.style.animation = '';
+      // Reverter o toggle em caso de erro
+      this.toggleTarget.checked = !newStatus;
+    } finally {
+      this.animateToggle(false);
     }
   }
 
-  updateButton(status) {
-    const button = this.element;
-    const buttonText = button.querySelector('.button-text');
-    const card = button.closest('.card');
-    const icon = card.querySelector('i');
-    const badge = card.querySelector('.badge');
+  updateToggleDisplay() {
+    const isOn = this.statusValue;
     
-    console.log('🎨 Atualizando botão para status:', status);
+    console.log('🎨 Atualizando display do toggle para:', isOn ? 'ON' : 'OFF');
     
-    // Atualizar classes do botão
-    button.classList.remove('btn-outline-success', 'btn-outline-danger');
-    button.classList.add(status ? 'btn-outline-danger' : 'btn-outline-success');
-    
-    // Atualizar texto
-    buttonText.textContent = status ? 'Desativar Aceite Automático' : 'Ativar Aceite Automático';
+    // Atualizar classes do container
+    this.element.classList.remove('toggle-off', 'toggle-on');
+    this.element.classList.add(isOn ? 'toggle-on' : 'toggle-off');
     
     // Atualizar ícone
-    icon.className = status ? 'fas fa-toggle-on text-danger me-2 fs-4' : 'fas fa-toggle-off text-success me-2 fs-4';
+    if (this.hasIconTarget) {
+      this.iconTarget.className = isOn 
+        ? 'fas fa-robot text-success' 
+        : 'fas fa-robot text-secondary';
+    }
     
-    // Atualizar badge
-    badge.className = status ? 'badge bg-danger bg-opacity-10 text-danger' : 'badge bg-success bg-opacity-10 text-success';
-    badge.textContent = status ? 'ON' : 'OFF';
+    // Atualizar texto do status
+    if (this.hasStatusTextTarget) {
+      this.statusTextTarget.textContent = isOn ? 'ATIVADO' : 'DESATIVADO';
+      this.statusTextTarget.className = isOn 
+        ? 'badge bg-success bg-opacity-10 text-success' 
+        : 'badge bg-secondary bg-opacity-10 text-secondary';
+    }
+    
+    // Atualizar label
+    if (this.hasLabelTarget) {
+      this.labelTarget.textContent = isOn 
+        ? 'Aceite Automático ATIVADO' 
+        : 'Aceite Automático DESATIVADO';
+    }
+    
+    // Atualizar estado do toggle
+    if (this.hasToggleTarget) {
+      this.toggleTarget.checked = isOn;
+    }
     
     // Adicionar animação de transição
-    card.style.transition = 'all 0.3s ease';
-    card.style.transform = 'scale(1.05)';
+    this.element.style.transition = 'all 0.3s ease';
+    this.element.style.transform = 'scale(1.05)';
     setTimeout(() => {
-      card.style.transform = 'scale(1)';
+      this.element.style.transform = 'scale(1)';
     }, 300);
   }
 
-  showMessage(type, message) {
-    console.log('💬 Mostrando mensagem:', type, message);
+  animateToggle(loading) {
+    const toggle = this.hasToggleTarget ? this.toggleTarget : this.element;
     
-    // Criar toast personalizado
+    if (loading) {
+      // Estado de loading
+      toggle.disabled = true;
+      toggle.classList.add('toggle-switch-loading');
+      console.log('⏳ Toggle em loading...');
+    } else {
+      // Estado normal
+      toggle.disabled = false;
+      toggle.classList.remove('toggle-switch-loading');
+      console.log('✅ Toggle saiu do loading');
+    }
+  }
+
+  showSuccessMessage(message) {
+    this.showToast('success', '✅ ' + message);
+  }
+
+  showErrorMessage(message) {
+    this.showToast('danger', '❌ ' + message);
+  }
+
+  showToast(type, message) {
+    console.log('💬 Mostrando toast:', type, message);
+    
+    // Criar toast moderno
     const toast = document.createElement('div');
     toast.className = `toast align-items-center text-white bg-${type} border-0`;
     toast.setAttribute('role', 'alert');
@@ -150,7 +191,10 @@ export default class extends Controller {
     
     toast.innerHTML = `
       <div class="d-flex">
-        <div class="toast-body">${message}</div>
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+          ${message}
+        </div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     `;
@@ -167,15 +211,15 @@ export default class extends Controller {
     container.appendChild(toast);
     
     // Mostrar toast
-    const bsToast = new bootstrap.Toast(toast);
+    const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
     bsToast.show();
     
-    // Remover após 5 segundos
+    // Remover após 4 segundos
     setTimeout(() => {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
       }
-    }, 5000);
+    }, 4000);
   }
 
   getCSRFToken() {

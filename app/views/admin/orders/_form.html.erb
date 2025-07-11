@@ -15,7 +15,7 @@
   </div>
   <div class="col-md-6">
     <%= form.label :status, 'Status', class: 'form-label' %>
-    <%= form.select :status, options_for_select(['novo', 'ag_aprovacao', 'em_preparacao', 'pronto', 'entregue', 'cancelado'], order.status), {}, class: 'form-select', required: true %>
+    <%= form.select :status, options_for_select(['ag_aprovacao', 'producao', 'pronto'], order.status), {}, class: 'form-select', required: true %>
   </div>
   <div class="col-md-6">
     <%= form.label :scheduled_for, 'Data e hora para entrega', class: 'form-label' %>

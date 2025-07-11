@@ -1,5 +1,5 @@
 class Admin::OrdersController < ApplicationController
-  before_action :set_order, only: %i[show edit update destroy]
+  before_action :set_order, only: %i[show edit update destroy update_status]
 
   def index
     @orders = Order.includes(:customer, :order_items).all
@@ -14,7 +14,7 @@ class Admin::OrdersController < ApplicationController
   end
 
   def create
-    status = Setting.aceite_automatico? ? 'novo' : 'ag_aprovacao'
+    status = Setting.aceite_automatico? ? 'producao' : 'ag_aprovacao'
     @order = Order.new(order_params.merge(status: status))
     if @order.save
       redirect_to admin_order_path(@order), notice: 'Pedido criado com sucesso.'
@@ -53,6 +53,38 @@ class Admin::OrdersController < ApplicationController
         format.turbo_stream { head :unprocessable_entity }
         format.html { redirect_to admin_order_path(@order), alert: 'Pedido já foi aceito ou não está aguardando aprovação.' }
       end
+    end
+  end
+
+  def update_status
+    new_status = params[:status]
+    
+    # Validar se a transição é permitida usando OrderStatusService
+    service = OrderStatusService.new(@order)
+    valid_transitions = service.status_transitions
+    
+    unless valid_transitions.include?(new_status)
+      render json: { 
+        error: 'Transição de status não permitida',
+        valid_transitions: valid_transitions 
+      }, status: :unprocessable_entity
+      return
+    end
+    
+    if @order.update(status: new_status)
+      render json: { 
+        success: true,
+        message: "Status atualizado para #{new_status.tr('_', ' ')}", 
+        order: {
+          id: @order.id,
+          status: @order.status
+        }
+      }
+    else
+      render json: { 
+        error: 'Erro ao atualizar status',
+        errors: @order.errors.full_messages 
+      }, status: :unprocessable_entity
     end
   end
 

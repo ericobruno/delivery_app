@@ -1,0 +1,91 @@
+<!-- Debug Panel para Kanban -->
+<div class="alert alert-info mb-3">
+  <h6>🔧 Debug Kanban System</h6>
+  <div class="row">
+    <div class="col-md-6">
+      <small><strong>📊 Dados:</strong></small>
+      <ul class="mb-0 small">
+        <li>Total de pedidos: <%= orders.count %></li>
+        <li>Stimulus registrado: <span id="stimulus-status">❓</span></li>
+        <li>Sortable.js carregado: <span id="sortable-status">❓</span></li>
+        <li>Kanban controller: <span id="kanban-status">❓</span></li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <small><strong>🎮 Testes:</strong></small>
+      <div class="btn-group-vertical btn-group-sm w-100">
+        <button class="btn btn-outline-primary btn-sm" onclick="testStimulus()">Testar Stimulus</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="testSortable()">Testar Sortable.js</button>
+        <button class="btn btn-outline-success btn-sm" onclick="testKanban()">Testar Kanban</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Debug functions
+function testStimulus() {
+  const status = document.getElementById('stimulus-status');
+  if (window.Stimulus) {
+    status.innerHTML = '✅ OK';
+    status.className = 'text-success';
+    console.log('✅ Stimulus está disponível:', window.Stimulus);
+  } else {
+    status.innerHTML = '❌ ERRO';
+    status.className = 'text-danger';
+    console.log('❌ Stimulus não encontrado');
+  }
+}
+
+function testSortable() {
+  const status = document.getElementById('sortable-status');
+  
+  // Testar import dinâmico
+  import('sortablejs').then(Sortable => {
+    status.innerHTML = '✅ OK';
+    status.className = 'text-success';
+    console.log('✅ Sortable.js carregado:', Sortable);
+  }).catch(error => {
+    status.innerHTML = '❌ ERRO';
+    status.className = 'text-danger';
+    console.log('❌ Erro ao carregar Sortable.js:', error);
+  });
+}
+
+function testKanban() {
+  const status = document.getElementById('kanban-status');
+  const kanbanElement = document.querySelector('[data-controller="kanban"]');
+  
+  if (kanbanElement) {
+    status.innerHTML = '✅ Elemento encontrado';
+    status.className = 'text-success';
+    console.log('✅ Elemento Kanban encontrado:', kanbanElement);
+    
+    // Verificar se o controller está conectado
+    const controllerInstance = kanbanElement.controller;
+    if (controllerInstance) {
+      console.log('✅ Controller instance encontrada:', controllerInstance);
+    } else {
+      console.log('⚠️ Controller instance não encontrada');
+    }
+  } else {
+    status.innerHTML = '❌ Elemento não encontrado';
+    status.className = 'text-danger';
+    console.log('❌ Elemento [data-controller="kanban"] não encontrado');
+  }
+}
+
+// Auto-test on load
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(() => {
+    testStimulus();
+    testSortable();
+    testKanban();
+  }, 1000);
+});
+
+// Log para debug
+console.log('🔧 Debug Kanban carregado');
+console.log('📄 Document ready state:', document.readyState);
+console.log('🌐 Location:', window.location.href);
+</script> 

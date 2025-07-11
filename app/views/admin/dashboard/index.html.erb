@@ -1,4 +1,10 @@
 <h1>Painel Administrativo</h1>
+
+<!-- Container para flash messages -->
+<div id="flash-messages">
+  <%= render 'shared/flash' %>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
   <div></div>
   <div>
@@ -15,8 +21,6 @@
   </div>
 </div>
 
-<h3>Pedidos Filtrados</h3>
 <turbo-frame id="pedidos">
-  <%= render 'status_cards' %>
-  <%= render 'pedidos_table', orders: @filtered_orders %>
+  <%= render 'kanban_board_frame', orders: @kanban_orders %>
 </turbo-frame>

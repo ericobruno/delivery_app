@@ -29,7 +29,7 @@ class Setting < ApplicationRecord
   end
 
   # Método para verificar se uma configuração existe
-  def self.exists?(key)
+  def self.setting_exists?(key)
     exists?(key: key)
   end
 

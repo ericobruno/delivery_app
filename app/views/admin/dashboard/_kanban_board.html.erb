@@ -1,0 +1,105 @@
+<div class="kanban-board" 
+     data-controller="kanban" 
+     data-kanban-update-url-value="<%= admin_orders_path %>">
+  
+  <div class="kanban-columns d-flex gap-3 overflow-auto pb-3">
+    <% ['novo', 'ag_aprovacao', 'producao', 'pronto', 'entregue', 'cancelado'].each do |status| %>
+      <% status_orders = orders.select { |order| order.status == status } %>
+      <% column_color = case status
+           when 'novo' then 'primary'
+           when 'ag_aprovacao' then 'warning'
+           when 'producao' then 'info'
+           when 'pronto' then 'success'
+           when 'entregue' then 'dark'
+           when 'cancelado' then 'danger'
+           else 'secondary'
+         end %>
+      
+      <div class="kanban-column bg-light border rounded p-3" 
+           data-status="<%= status %>"
+           style="flex: 1; min-width: 350px; min-height: 500px;">
+        
+        <!-- Header da coluna -->
+        <div class="kanban-column-header mb-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 fw-bold text-<%= column_color %>">
+              <i class="fas fa-circle me-2" style="font-size: 0.7rem;"></i>
+              <%= status.tr('_', ' ').upcase %>
+            </h6>
+            <span class="badge bg-<%= column_color %> rounded-pill">
+              <%= status_orders.count %>
+            </span>
+          </div>
+          
+          <% case status %>
+          <% when 'novo' %>
+            <small class="text-muted">Pedidos recém-criados</small>
+          <% when 'ag_aprovacao' %>
+            <small class="text-muted">Aguardando aprovação manual</small>
+          <% when 'producao' %>
+            <small class="text-muted">Em produção/preparação</small>
+          <% when 'pronto' %>
+            <small class="text-muted">Pronto para entrega</small>
+          <% when 'entregue' %>
+            <small class="text-muted">Entregues com sucesso</small>
+          <% when 'cancelado' %>
+            <small class="text-muted">Pedidos cancelados</small>
+          <% end %>
+        </div>
+        
+        <!-- Cards dos pedidos -->
+        <div class="kanban-cards" style="min-height: 400px;">
+          <% status_orders.each do |order| %>
+            <%= render 'admin/dashboard/kanban_order_card', order: order %>
+          <% end %>
+          
+          <!-- Placeholder quando vazio -->
+          <% if status_orders.empty? %>
+            <div class="kanban-empty-placeholder text-center py-5">
+              <i class="fas fa-box-open text-muted" style="font-size: 2rem;"></i>
+              <p class="text-muted mt-2 mb-0">Nenhum pedido</p>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Footer da coluna com ações rápidas -->
+        <div class="kanban-column-footer mt-3 pt-3 border-top">
+          <% case status %>
+          <% when 'novo' %>
+            <small class="text-muted d-block text-center">
+              <i class="fas fa-bell me-1"></i>
+              Novos pedidos
+            </small>
+          <% when 'ag_aprovacao' %>
+            <% if status_orders.any? %>
+              <%= button_to "Aprovar Todos (#{status_orders.count})", 
+                            '#', 
+                            class: 'btn btn-sm btn-outline-success w-100',
+                            title: 'Aprovar todos os pedidos em lote' %>
+            <% end %>
+          <% when 'producao' %>
+            <small class="text-muted d-block text-center">
+              <i class="fas fa-clock me-1"></i>
+              Tempo médio: ~15min
+            </small>
+          <% when 'pronto' %>
+            <small class="text-muted d-block text-center">
+              <i class="fas fa-truck me-1"></i>
+              Aguardando coleta
+            </small>
+          <% when 'entregue' %>
+            <small class="text-success d-block text-center">
+              <i class="fas fa-check-circle me-1"></i>
+              Concluídos
+            </small>
+          <% when 'cancelado' %>
+            <small class="text-danger d-block text-center">
+              <i class="fas fa-times-circle me-1"></i>
+              Cancelados
+            </small>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div> 

@@ -3,7 +3,7 @@ class Api::OrdersController < ApplicationController
   before_action :authenticate_api_token!
 
   def create
-    status = Setting.aceite_automatico? ? 'novo' : 'ag_aprovacao'
+    status = Setting.aceite_automatico? ? 'producao' : 'ag_aprovacao'
     @order = Order.new(order_params.merge(status: status))
     if @order.save
       render json: @order, status: :created

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :users
+  
   namespace :admin do
     root to: 'dashboard#index'
     post 'toggle_aceite_automatico', to: 'dashboard#toggle_aceite_automatico', as: :toggle_aceite_automatico
@@ -10,6 +12,7 @@ Rails.application.routes.draw do
     resources :orders do
       member do
         post :accept
+        patch :update_status
       end
     end
     resources :customers

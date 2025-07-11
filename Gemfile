@@ -64,4 +64,7 @@ end
 gem "hotwire-rails", "~> 0.1.3"
 gem "importmap-rails"
 
+# Authentication
+gem "devise"
+
 gem "rspec-rails", "~> 7.1"
