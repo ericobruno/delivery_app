@@ -1,22 +1,52 @@
+<!-- TOGGLE SWITCH - ACEITE AUTOMÁTICO -->
 <!-- ESTADO ATUAL: <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %> -->
 
-<div data-controller="aceite-automatico" 
+<div class="aceite-automatico-container" 
+     data-controller="aceite-automatico" 
      data-aceite-automatico-url-value="<%= admin_toggle_aceite_automatico_path %>"
      data-aceite-automatico-current-status-value="<%= Setting.aceite_automatico? ? 'on' : 'off' %>">
   
-  <% if Setting.aceite_automatico? %>
-    <button data-aceite-automatico-target="button" 
-            data-action="click->aceite-automatico#toggle"
-            class="btn btn-success btn-sm" 
-            data-status="on">
-      Aceite automático ON
-    </button>
-  <% else %>
-    <button data-aceite-automatico-target="button" 
-            data-action="click->aceite-automatico#toggle"
-            class="btn btn-outline-secondary btn-sm" 
-            data-status="off">
-      Aceite automático OFF
-    </button>
-  <% end %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-bolt text-warning me-2 fs-4"></i>
+            <h6 class="mb-0 fw-bold">Aceite Automático</h6>
+            <span class="badge ms-2 <%= Setting.aceite_automatico? ? 'bg-success' : 'bg-secondary' %>">
+              <%= Setting.aceite_automatico? ? 'ATIVO' : 'INATIVO' %>
+            </span>
+          </div>
+          <p class="text-muted small mb-0">
+            <%= Setting.aceite_automatico? ? 'Novos pedidos são aceitos automaticamente' : 'Novos pedidos aguardam aprovação manual' %>
+          </p>
+        </div>
+        <div class="col-md-4 text-end">
+          <!-- TOGGLE SWITCH -->
+          <div class="form-check form-switch form-switch-lg">
+            <input class="form-check-input toggle-switch" 
+                   type="checkbox" 
+                   role="switch" 
+                   id="aceiteAutomaticoSwitch"
+                   data-aceite-automatico-target="toggle"
+                   data-action="change->aceite-automatico#handleToggle"
+                   <%= Setting.aceite_automatico? ? 'checked' : '' %>>
+            <label class="form-check-label toggle-label" for="aceiteAutomaticoSwitch">
+              <span class="toggle-text">
+                <%= Setting.aceite_automatico? ? 'ON' : 'OFF' %>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div class="loading-overlay d-none" data-aceite-automatico-target="loading">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+        <span class="ms-2 text-primary">Atualizando...</span>
+      </div>
+    </div>
+  </div>
 </div> 
