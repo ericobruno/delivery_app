@@ -1,6 +1,6 @@
 class Api::OrdersController < ApplicationController
   skip_forgery_protection
-  before_action :authenticate_api_token!
+  before_action :authenticate_api_token!, except: [:test]
 
   def create
     status = Setting.aceite_automatico? ? 'producao' : 'ag_aprovacao'
@@ -10,6 +10,18 @@ class Api::OrdersController < ApplicationController
     else
       render json: @order.errors, status: :unprocessable_entity
     end
+  end
+
+  def test
+    render json: {
+      status: 'success',
+      message: 'API test endpoint working correctly',
+      timestamp: Time.current,
+      environment: Rails.env,
+      database_connected: ActiveRecord::Base.connection.active?,
+      orders_count: Order.count,
+      api_token_configured: ENV['API_ORDER_TOKEN'].present?
+    }
   end
 
   private

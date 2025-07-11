@@ -44,16 +44,16 @@
     
     <!-- Itens do pedido (resumo) -->
     <div class="mb-2">
-      <% total_items = order.order_items.sum(:quantity) %>
+      <% total_items = order.order_items.sum(&:quantity) %>
       <small class="text-muted">
         <i class="fas fa-shopping-bag me-1"></i>
         <%= total_items %> <%= total_items == 1 ? 'item' : 'itens' %>
         
-        <% if order.order_items.limit(2).any? %>
+        <% if order.order_items.any? %>
           <span class="ms-1">
-            <%= order.order_items.limit(2).map { |item| item.product&.name }.compact.join(', ') %>
-            <% if order.order_items.count > 2 %>
-              <span class="text-primary">+<%= order.order_items.count - 2 %></span>
+            <%= order.order_items.first(2).map { |item| item.product&.name }.compact.join(', ') %>
+            <% if order.order_items.size > 2 %>
+              <span class="text-primary">+<%= order.order_items.size - 2 %></span>
             <% end %>
           </span>
         <% end %>

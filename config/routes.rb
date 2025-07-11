@@ -3,6 +3,8 @@ Rails.application.routes.draw do
   
   namespace :admin do
     root to: 'dashboard#index'
+    get 'test', to: 'dashboard#test', as: :test
+    get 'health', to: 'dashboard#health', as: :health
     post 'toggle_aceite_automatico', to: 'dashboard#toggle_aceite_automatico', as: :toggle_aceite_automatico
     resources :products do
       member do
@@ -21,6 +23,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :orders, only: [:create]
+    get 'test', to: 'orders#test', as: :test
   end
 
   root to: 'admin/dashboard#index'

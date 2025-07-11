@@ -8,7 +8,10 @@ class Admin::DashboardController < ApplicationController
     @filtered_orders = get_filtered_orders(@orders)
     
     # Para o kanban, precisamos de todos os pedidos (não limitados)
-    @kanban_orders = @orders.includes(:customer, :order_items => :product).order(created_at: :desc)
+    # Melhorando o eager loading para evitar N+1 queries
+    @kanban_orders = @orders
+      .includes(:customer, order_items: :product)
+      .order(created_at: :desc)
 
     if turbo_frame_request?
       if request.headers["Turbo-Frame"].to_s == "pedidos"
@@ -17,6 +20,30 @@ class Admin::DashboardController < ApplicationController
         head :ok
       end
     end
+  end
+
+  def test
+    render json: {
+      status: 'success',
+      message: 'Test route working correctly',
+      timestamp: Time.current,
+      environment: Rails.env,
+      database_connected: ActiveRecord::Base.connection.active?,
+      orders_count: Order.count,
+      products_count: Product.count,
+      customers_count: Customer.count
+    }
+  end
+
+  def health
+    render json: {
+      status: 'healthy',
+      timestamp: Time.current,
+      environment: Rails.env,
+      database_connected: ActiveRecord::Base.connection.active?,
+      version: Rails.version,
+      ruby_version: RUBY_VERSION
+    }
   end
 
   def toggle_aceite_automatico
