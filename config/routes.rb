@@ -4,10 +4,11 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: 'dashboard#index'
     post 'toggle_aceite_automatico', to: 'dashboard#toggle_aceite_automatico', as: :toggle_aceite_automatico
+    get 'test', to: 'dashboard#index'  # Rota de teste simples
     
     # Configurações de agendamento
     get 'scheduling', to: 'scheduling#index'
-    get 'test-scheduling', to: 'scheduling#index'  # Rota de teste
+    get 'test-scheduling', to: 'scheduling#index'
     
     resources :products do
       member do
